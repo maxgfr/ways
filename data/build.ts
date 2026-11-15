@@ -22,7 +22,13 @@ import { mkdir, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
-import { GtfsParser, StraightLineTransferGenerator, standardGtfsProfile } from "minotor/parser";
+import {
+  extendedGtfsProfile,
+  GtfsParser,
+  type GtfsProfile,
+  StraightLineTransferGenerator,
+  standardGtfsProfile,
+} from "minotor/parser";
 import { encodeGraph } from "../src/local/graph";
 import type { RegionInfo } from "../src/local/packs";
 import { addDays, toServiceTime } from "../src/local/time";
@@ -62,8 +68,17 @@ const MAX_FEED_BYTES = env("WAYS_MAX_FEED_MB", 40) * 1024 * 1024;
 const MAX_REGION_BYTES = 60 * 1024 * 1024;
 /** The street network covers at most this many degrees around the centre of the network. */
 const STREETS_HALF_SPAN = 0.08;
-/** A day's timetable this small (serialised) holds no trip. */
-const EMPTY_TIMETABLE_BYTES = 512;
+/**
+ * Route types as feeds write them: the extended codes (400 metro, 700 bus, 900 tram…) many
+ * European feeds use, and the basic ones (0 tram, 3 bus…). Each of minotor's profiles reads only
+ * one set; with the basic one alone, Munich's timetables came out empty.
+ */
+export const PROFILE: GtfsProfile = {
+  ...extendedGtfsProfile,
+  routeTypeParser: (type) =>
+    extendedGtfsProfile.routeTypeParser(type) ?? standardGtfsProfile.routeTypeParser(type),
+};
+
 /** How long one download may take before it is given up for tonight. */
 const FEED_TIMEOUT_MS = 5 * 60_000;
 const OVERPASS_TIMEOUT_MS = 4 * 60_000;
@@ -186,7 +201,7 @@ export async function packRegion(
 
   const parser = new GtfsParser(
     zip,
-    standardGtfsProfile,
+    PROFILE,
     new StraightLineTransferGenerator({ maxDistanceMeters: 300 }),
   );
   const stops = await parser.parseStops();
@@ -201,9 +216,9 @@ export async function packRegion(
     const [y = 1970, m = 1, d = 1] = date.split("-").map(Number);
     // Noon UTC is the same calendar day wherever this script runs.
     const timetable = await parser.parseTimetable(new Date(Date.UTC(y, m - 1, d, 12)));
-    const bytes = timetable.serialize();
-    if (bytes.length > EMPTY_TIMETABLE_BYTES) served++;
-    await put(`timetable-${date}.bin.gz`, gzipSync(bytes));
+    // Routes are numbered from 0, and a day without a single trip has none.
+    if (timetable.getRoute(0) !== undefined) served++;
+    await put(`timetable-${date}.bin.gz`, gzipSync(timetable.serialize()));
     days.push(date);
   }
   // A feed whose calendar does not reach the coming days gives empty timetables: no use offline.
