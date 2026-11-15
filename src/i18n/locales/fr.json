@@ -241,5 +241,7 @@
   "cat.source": "Lieux issus d'OpenStreetMap, lus dans la carte déjà affichée : rien n'est envoyé.",
   "layer.places": "Lieux",
   "layer.places.hint": "Commerces, restaurants, musées et plus encore, d'après OpenStreetMap. Touche un lieu pour le voir.",
-  "place.lookup": "Recherche de ses informations…"
+  "place.lookup": "Recherche de ses informations…",
+  "sources.data.use": "Données hors ligne : les horaires, les arrêts et les rues des secteurs où tu cherches quelque chose, reconstruits chaque nuit à partir de données ouvertes.",
+  "sources.data.sent": "Reçoit la zone dont les fichiers sont téléchargés. C'est ce même site : rien ne part vers un tiers."
 }

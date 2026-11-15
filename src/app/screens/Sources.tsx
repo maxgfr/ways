@@ -60,6 +60,14 @@ const SOURCES: Source[] = [
     link: "https://operations.osmfoundation.org/policies/nominatim/",
     linkLabel: "sources.link.policy",
   },
+  {
+    name: "ways-data",
+    host: () => "maxgfr.github.io/ways-data",
+    use: "sources.data.use",
+    sent: "sources.data.sent",
+    link: "https://github.com/maxgfr/ways-data",
+    linkLabel: "sources.link.site",
+  },
 ];
 
 export function Sources() {

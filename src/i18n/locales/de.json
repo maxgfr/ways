@@ -241,5 +241,7 @@
   "cat.source": "Orte aus OpenStreetMap, aus der bereits angezeigten Karte gelesen: Es wird nichts gesendet.",
   "layer.places": "Orte",
   "layer.places.hint": "Geschäfte, Restaurants, Museen und mehr, aus OpenStreetMap. Tippe auf einen Ort, um ihn anzusehen.",
-  "place.lookup": "Details werden gesucht…"
+  "place.lookup": "Details werden gesucht…",
+  "sources.data.use": "Offline-Daten: Fahrpläne, Haltestellen und Straßen der Gebiete, in denen du etwas suchst, jede Nacht aus offenen Daten neu erstellt.",
+  "sources.data.sent": "Erhält, welches Gebiet heruntergeladen wird. Es ist dieselbe Website: Nichts geht an Dritte."
 }

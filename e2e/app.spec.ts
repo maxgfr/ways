@@ -279,6 +279,7 @@ test("the sources screen names every service the page talks to", async ({ page }
     "valhalla1.openstreetmap.de",
     "photon.komoot.io",
     "nominatim.openstreetmap.org",
+    "maxgfr.github.io/ways-data",
   ]) {
     await expect(page.getByText(host, { exact: true })).toBeVisible();
   }
