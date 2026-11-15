@@ -1,0 +1,270 @@
+/** French. Same keys as the English catalogue; a missing one falls back to English. */
+import type { MessageKey } from "./en";
+
+export const fr: Record<MessageKey, string> = {
+  "action.back": "Retour",
+  "action.clear": "Effacer",
+  "action.directions": "Itinéraire",
+  "action.retry": "Réessayer",
+  "action.save": "Enregistrer",
+  "action.saved": "Enregistré",
+  "action.share": "Partager",
+  "alert.more": "En savoir plus",
+
+  "chip.transit": "Arrêts",
+  "chip.cycling": "Pistes cyclables",
+  "chip.rentals": "Vélos partagés",
+  "chip.vehicles": "Véhicules en direct",
+
+  "dir.title": "Itinéraire",
+  "dir.from": "Départ",
+  "dir.from.placeholder": "Choisir un point de départ",
+  "dir.to": "Arrivée",
+  "dir.to.placeholder": "Choisir une destination",
+  "dir.myPosition": "Ma position",
+  "dir.swap": "Inverser départ et arrivée",
+  "dir.mode": "Mode de déplacement",
+  "dir.when": "Quand",
+  "dir.when.now": "Partir maintenant",
+  "dir.when.depart": "Partir à",
+  "dir.when.arrive": "Arriver avant",
+  "dir.when.time": "Date et heure",
+  "dir.options": "Options",
+  "dir.pickDestination": "Choisis une destination pour voir comment t'y rendre.",
+  "dir.needPosition":
+    "D'où pars-tu ? Utilise ta position, ou choisis un point de départ ci-dessus.",
+  "dir.usePosition": "Utiliser ma position",
+  "dir.searching": "Recherche de trajets",
+  "dir.none":
+    "Aucun trajet trouvé entre ces deux points à cette heure. Essaie une autre heure ou un autre mode.",
+  "dir.failed": "{services} n'a pas répondu. Vérifie ta connexion et réessaie.",
+  "dir.fallback": "{services} n'a pas répondu ; ces trajets viennent d'un autre service.",
+  "dir.noRegion":
+    "Mode local : aucune région téléchargée sur cet appareil ne couvre ce trajet. Passe le mode sur Auto ou En ligne dans les réglages.",
+  "dir.origin": "Calculé par {service} ({host}).",
+  "dir.origin.device": "Calculé sur cet appareil. Rien n'a été envoyé.",
+  "dir.direct": "Direct",
+  "dir.transfers.one": "{n} correspondance",
+  "dir.transfers.other": "{n} correspondances",
+  "dir.ascent": "{n} m de montée",
+
+  "home.directions": "Itinéraire",
+  "home.saved": "Enregistrés",
+  "home.layers": "Couches",
+  "home.settings": "Réglages",
+  "home.savedTitle": "Enregistrés",
+  "home.recent": "Récents",
+  "home.nearby": "Arrêts autour d'ici",
+  "home.nearby.off": "Active la couche Arrêts pour lister les arrêts autour du centre de la carte.",
+  "home.nearby.far": "Zoome sur la carte pour lister les arrêts autour d'ici.",
+  "home.nearby.none": "Aucun arrêt dans cette partie de la carte.",
+  "home.nearby.error": "Transitous n'a pas répondu. Déplace la carte pour réessayer.",
+
+  "layers.title": "Couches",
+  "layer.transit": "Arrêts",
+  "layer.transit.hint": "Arrêts de transport en commun, fournis par Transitous.",
+  "layer.cycling": "Pistes cyclables",
+  "layer.cycling.hint":
+    "Pistes et chemins balisés pour les vélos, d'après OpenStreetMap. Les bandes peintes sur la chaussée ne sont pas affichées.",
+  "layer.rentals": "Vélos et trottinettes partagés",
+  "layer.rentals.hint":
+    "Stations et véhicules libres avec leur disponibilité, fournis par Transitous.",
+  "layer.vehicles": "Véhicules en direct",
+  "layer.vehicles.hint":
+    "Bus, trams et trains en service, fournis par Transitous. Consomme plus de données.",
+  "layer.zoomIn": "Zoome pour les voir.",
+  "layer.error": "Le service n'a pas répondu. Déplace la carte pour réessayer.",
+
+  "leg.walk": "Marche",
+  "leg.bike": "Vélo",
+  "leg.car": "Voiture",
+  "leg.rental": "Véhicule partagé",
+  "leg.rentalWith": "Véhicule partagé ({provider})",
+  "leg.stops.one": "{n} arrêt",
+  "leg.stops.other": "{n} arrêts",
+  "leg.steps.one": "{n} étape",
+  "leg.steps.other": "{n} étapes",
+
+  "locate.label": "Afficher ma position",
+  "locate.unsupported": "Ce navigateur ne sait pas te localiser.",
+  "locate.denied":
+    "La localisation est bloquée pour ce site. Autorise-la dans les réglages du site de ton navigateur, ou choisis un point de départ à la main.",
+  "locate.failed": "Ta position est introuvable.",
+
+  "map.label": "Carte",
+
+  "mode.transit": "Transports",
+  "mode.bike": "Vélo",
+  "mode.walk": "À pied",
+
+  "place.pinned": "Point sur la carte",
+  "place.hours": "Horaires d'ouverture",
+  "place.cuisine": "Cuisine",
+  "place.phone": "Téléphone",
+  "place.website": "Site web",
+  "place.wheelchair": "Accès en fauteuil roulant",
+  "place.wheelchair.yes": "Accessible en fauteuil roulant",
+  "place.wheelchair.limited": "Partiellement accessible en fauteuil roulant",
+  "place.wheelchair.no": "Non accessible en fauteuil roulant",
+  "place.source": "Détails issus d'OpenStreetMap, demandés à nominatim.openstreetmap.org.",
+
+  "pref.mode": "Mode préféré",
+  "pref.avoidHills": "Éviter les côtes à vélo",
+  "pref.avoidHills.hint": "Préfère un chemin plus plat, même s'il est plus long.",
+  "pref.stepFree": "Trajets sans marches",
+  "pref.stepFree.hint": "Rampes et ascenseurs plutôt qu'escaliers, quand les données le disent.",
+  "pref.pace": "Allure de marche",
+  "pref.pace.slow": "Lente",
+  "pref.pace.normal": "Normale",
+  "pref.pace.fast": "Rapide",
+  "pref.kept": "Gardé dans ce navigateur. Envoyé uniquement avec une demande de trajet.",
+
+  "rental.available.one": "{n} véhicule disponible",
+  "rental.available.other": "{n} véhicules disponibles",
+  "rental.docks.one": "{n} place libre",
+  "rental.docks.other": "{n} places libres",
+  "rental.bike": "Vélo partagé",
+  "rental.scooter": "Trottinette partagée",
+
+  "saved.title": "Enregistrés",
+  "saved.empty":
+    "Rien d'enregistré pour l'instant. Ouvre un lieu ou un arrêt et appuie sur Enregistrer pour le retrouver ici.",
+  "saved.remove": "Retirer {name}",
+  "saved.removed": "Retiré",
+  "saved.note": "Les lieux enregistrés restent dans ce navigateur. Ils ne sont envoyés nulle part.",
+
+  "search.label": "Rechercher",
+  "search.placeholder": "Chercher un lieu ou un arrêt",
+  "search.results": "Résultats",
+  "search.group.kept": "Enregistrés et récents",
+  "search.group.stops": "Arrêts",
+  "search.group.places": "Lieux",
+  "search.error": "Les services de recherche n'ont pas répondu. Vérifie ta connexion et réessaie.",
+  "search.partial": "{service} n'a pas répondu ; il manque des résultats.",
+  "search.nothing": "Rien trouvé.",
+  "search.keepTyping": "Continue à taper…",
+
+  "settings.title": "Réglages",
+  "settings.language": "Langue",
+  "settings.theme": "Thème",
+  "settings.theme.system": "Système",
+  "settings.theme.light": "Clair",
+  "settings.theme.dark": "Sombre",
+  "settings.travel": "Ta façon de te déplacer",
+  "settings.engine": "Mode",
+  "settings.engine.auto": "Auto",
+  "settings.engine.online": "En ligne",
+  "settings.engine.device": "Local",
+  "settings.engine.auto.hint":
+    "Les trajets sont d'abord demandés aux services ouverts, puis calculés sur cet appareil s'ils ne répondent pas et qu'une région téléchargée couvre le trajet.",
+  "settings.engine.online.hint":
+    "Les trajets sont calculés par Transitous (transports) et Valhalla (vélo, marche). Les deux extrémités du trajet leur sont envoyées.",
+  "settings.engine.device.hint":
+    "Aucun service n'est appelé : rien de ce que tu fais ne quitte cet appareil. Les trajets sont calculés dans ce navigateur à partir d'une région téléchargée ; la recherche porte sur ce que tu as enregistré ; arrêts, passages et vélos partagés sont désactivés. Seules les tuiles de carte se chargent encore, sauf si tu as gardé la zone hors ligne. Aucune région n'est encore téléchargeable : aucun trajet ne sera donc trouvé dans ce mode.",
+  "settings.endpoints": "Services",
+  "settings.endpoints.hint":
+    "Laisse vide pour utiliser les serveurs communautaires, ou saisis l'adresse du tien. L'adresse est appelée depuis ce navigateur.",
+  "settings.endpoint.motis": "Serveur MOTIS (transports)",
+  "settings.endpoint.valhalla": "Serveur Valhalla (vélo, marche)",
+  "settings.endpoint.invalid": "Saisis une adresse qui commence par https:// ou http://",
+  "settings.offline": "Carte hors ligne",
+  "settings.offline.hint":
+    "Les zones de carte déjà vues restent disponibles sans connexion. Tu peux aussi garder tout ce qui est à l'écran, jusqu'au niveau de la rue.",
+  "settings.offline.keep": "Garder cette zone hors ligne",
+  "settings.offline.starting": "Démarrage…",
+  "settings.offline.progress": "{done} tuiles sur {total}",
+  "settings.offline.done": "{n} tuiles gardées pour le hors ligne.",
+  "settings.offline.partial":
+    "{n} tuiles sur {total} gardées ; les autres n'ont pas pu être téléchargées.",
+  "settings.offline.tooBig": "Cette zone est trop grande. Zoome et réessaie.",
+  "settings.offline.noWorker":
+    "Le stockage hors ligne n'est pas prêt. Il ne fonctionne que sur le site publié ; recharge la page et réessaie.",
+  "settings.offline.noSource": "La carte n'est pas encore prête. Réessaie dans un instant.",
+  "settings.data": "Tes données",
+  "settings.data.hint":
+    "Les lieux enregistrés, les recherches récentes et ces réglages sont stockés dans ce navigateur uniquement.",
+  "settings.data.clear": "Effacer les recherches récentes",
+  "settings.data.cleared": "Recherches récentes effacées",
+
+  "sheet.label": "Panneau",
+  "sheet.open": "Ouvrir le panneau",
+  "sheet.lower": "Baisser le panneau",
+
+  "sources.title": "Sources de données",
+  "sources.intro":
+    "ways n'a pas de serveur. Voici tous les services que la page contacte, et ce que chacun reçoit.",
+  "sources.link.site": "Site web",
+  "sources.link.feeds": "Sources des horaires et licences",
+  "sources.link.policy": "Conditions d'usage",
+  "sources.tiles.use": "La carte elle-même : des tuiles vectorielles tirées d'OpenStreetMap.",
+  "sources.tiles.sent": "Reçoit les zones de carte que tu regardes.",
+  "sources.transitous.use":
+    "Trajets en transports en commun, prochains passages, arrêts, véhicules en direct, vélos partagés et recherche d'arrêts.",
+  "sources.transitous.sent":
+    "Reçoit les deux extrémités d'un trajet demandé, la zone de carte pour les arrêts et les véhicules, et le texte tapé dans la recherche.",
+  "sources.valhalla.use": "Itinéraires à vélo et à pied, avec le dénivelé.",
+  "sources.valhalla.sent":
+    "Reçoit les deux extrémités du trajet et tes préférences de déplacement.",
+  "sources.photon.use": "Recherche de lieux et adresse d'un point pressé sur la carte.",
+  "sources.photon.sent":
+    "Reçoit le texte tapé et le centre de la carte, pour classer d'abord les résultats proches.",
+  "sources.nominatim.use": "Détails d'un lieu : horaires, site web, téléphone.",
+  "sources.nominatim.sent": "Reçoit la référence du lieu dont tu ouvres la fiche.",
+  "sources.osm.title": "Données cartographiques",
+  "sources.osm.text":
+    "Les données de la carte viennent des contributeurs d'OpenStreetMap, sous licence Open Database.",
+  "sources.osm.fix": "Corriger la carte",
+  "sources.contact.title": "Contact",
+  "sources.contact.text": "ways est libre et non commercial. Questions, problèmes et demandes :",
+
+  "state.loading": "Chargement…",
+
+  "step.depart": "Pars",
+  "step.continue": "Continue",
+  "step.left": "Tourne à gauche",
+  "step.right": "Tourne à droite",
+  "step.slightLeft": "Serre à gauche",
+  "step.slightRight": "Serre à droite",
+  "step.hardLeft": "Tourne franchement à gauche",
+  "step.hardRight": "Tourne franchement à droite",
+  "step.uturn": "Fais demi-tour",
+  "step.roundabout": "Prends le rond-point",
+  "step.stairs": "Prends l'escalier",
+  "step.elevator": "Prends l'ascenseur",
+  "step.onto": "{action} sur {street}",
+
+  "stop.departures": "Prochains passages",
+  "stop.now": "à l'instant",
+  "stop.live": "en direct",
+  "stop.scheduled": "théorique",
+  "stop.cancelled": "supprimé",
+  "stop.late": "{n} min de retard",
+  "stop.early": "{n} min d'avance",
+  "stop.track": "quai {track}",
+  "stop.none": "Aucun passage dans les prochaines heures.",
+  "stop.error": "{service} n'a pas répondu. Les passages s'afficheront dès qu'il répondra.",
+  "stop.stale": "{service} n'a pas répondu ; ces horaires ne sont peut-être plus à jour.",
+  "stop.runError": "{service} n'a pas envoyé les arrêts de cette ligne.",
+  "stop.source":
+    "Passages fournis par {service} ({host}). Les horaires « en direct » viennent du flux temps réel de l'exploitant ; les autres sont ceux de la fiche horaire.",
+
+  "store.error":
+    "Ce navigateur refuse de stocker des données : ce que tu enregistres sera perdu à la fermeture de l'onglet.",
+
+  "toast.copied": "Lien copié",
+  "toast.copyFailed": "Copie impossible : sélectionne l'adresse et copie-la.",
+
+  "locate.timeout":
+    "La recherche de ta position prend trop de temps. Place-toi à un endroit plus dégagé, ou réessaie.",
+  "layer.local": "Indisponible en mode local : aucun service n'est appelé.",
+  "home.local":
+    "Ce que tu enregistres, tes recherches et tes réglages restent dans ce navigateur. ways n'a ni compte ni serveur.",
+  "home.local.more": "Ce qui quitte cet appareil",
+  "search.local": "Mode local : la recherche porte uniquement sur ce que tu as enregistré.",
+  "stop.local":
+    "Mode local : les passages ne sont pas demandés. Passe le mode sur Auto ou En ligne dans les réglages pour les voir.",
+  "dir.positionNote":
+    "Ta position est trouvée par cet appareil. Elle ne le quitte que comme point de départ d'un trajet demandé à un service en ligne.",
+  "unit.min": "{n} min",
+  "unit.hmin": "{h} h {m}",
+};
