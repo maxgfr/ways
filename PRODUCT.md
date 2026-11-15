@@ -40,7 +40,7 @@ No backend of its own: the page talks straight to community-run open services (T
 - Favourites and recent searches kept in the browser (IndexedDB). Map tiles cached for offline use.
 - Travel preferences remembered on the device: preferred mode (transit, bike, walk), flatter routes by bike, walking pace, step-free routes.
 - Settings: routing engine (auto, online, on device), custom service endpoints, optional personal API keys, language, theme.
-- English and French, through translation catalogues; English is the source and the fallback.
+- English, French and German, through JSON translation catalogues; English is the source and the fallback.
 - No server, no account, no analytics, no secret key in the code. Strict CSP. Everything is a static file.
 - Fair use of third-party services is a hard constraint: directions are requested on an explicit action, never while typing; requests are debounced, cancelled and cached.
 - Open source (MIT) and non-commercial, which the Transitous usage policy requires.
@@ -51,7 +51,7 @@ No backend of its own: the page talks straight to community-run open services (T
 - Name: `ways`, lowercase, like the author's other tools.
 - Type: Barlow Condensed for anything printed on a label, Figtree for anything read. Inherited from spots.
 - No gradients, no teardrop pins. State is shown by shape, never by hue alone.
-- Tone: concise, second person; French uses "tu". An error says what happened and what to do next.
+- Tone: concise, second person; French uses "tu", German "du". An error says what happened and what to do next.
 - Look: the standard of the genre, played straight, chosen by the author. White rounded panels, one blue for actions and for the route. The finish it is measured against is Google Maps. Its name, icon, wording and artwork are its own.
 
 ## Evidence on Hand

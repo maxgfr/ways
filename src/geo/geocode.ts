@@ -47,8 +47,9 @@ interface PhotonFeature {
   properties?: PhotonProps;
 }
 
+/** Photon answers in English, German, French and Italian; every language ways speaks is one. */
 function photonLang(): string {
-  return lang.value === "fr" ? "fr" : "en";
+  return lang.value;
 }
 
 /** "20 Rue Alibert, 75010 Paris" from Photon's parts, without repeating the name. */

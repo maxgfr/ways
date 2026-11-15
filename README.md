@@ -16,7 +16,7 @@ No account, no server, no API key, no tracking. ways is a static page: your brow
 - **Opens where you are**: on your position when you allowed it before, otherwise on your city as your device's time zone tells it. No network is asked to guess.
 - **Offline**: installable; map areas you have seen stay available. The timetables and streets of the areas you look things up in download on their own, so trips there keep working without a network.
 - **Local mode**: one setting stops every call to a service. Trips are then computed in your browser from the offline data: public transport on the timetable, bike and foot on the street network. Nothing about the trip leaves the device.
-- English and French.
+- English, French and German.
 
 ## What leaves your device
 
@@ -77,7 +77,7 @@ src/local      routing on the device: street graph, timetable, worker, offline d
 data           discovers the networks and builds the offline data
 ```
 
-Adding a language: copy `src/i18n/en.ts`, translate the values, register it in `src/i18n/index.ts`.
+Translations are standard JSON bundles in `src/i18n/locales/`: `en.json` is the source and the fallback, and a test checks that every other bundle has the same keys and placeholders. German was added with [ultrai18n](https://github.com/maxgfr/ultrai18n): seed `de.json` from `en.json`, then `scan --from en --to de`, `plan`, `translate`, `apply --write`, and `plurals` and `sync` to check. A new language is a new bundle and one line in `LANGS` (`src/i18n/index.ts`).
 
 ## Licence
 
