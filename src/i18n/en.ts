@@ -38,7 +38,7 @@ export const en = {
   "dir.failed": "{services} did not answer. Check your connection and try again.",
   "dir.fallback": "{services} did not answer; these trips come from another service.",
   "dir.noRegion":
-    "Local mode: no region downloaded on this device covers this trip. Switch the mode to Auto or Online in the settings.",
+    "Local mode: no region on this device covers this trip. Download one in the settings, or switch the mode to Auto or Online.",
   "dir.origin": "Computed by {service} ({host}).",
   "dir.origin.device": "Computed on this device. Nothing was sent.",
   "dir.direct": "Direct",
@@ -155,7 +155,7 @@ export const en = {
   "settings.engine.online.hint":
     "Trips are computed by Transitous (transit) and Valhalla (bike, walk). Both ends of the trip are sent to them.",
   "settings.engine.device.hint":
-    "No service is called: nothing you do leaves this device. Trips are computed in this browser from a downloaded region; search covers what you saved; stops, departures and shared bikes are off. Only map tiles still load, unless you kept the area offline. No region can be downloaded yet, so no trip will be found in this mode.",
+    "No service is called: nothing you do leaves this device. Trips are computed in this browser from a downloaded region, on the timetable only (no live times). Search covers what you saved and the stops of your regions; departures and shared bikes are off. Only map tiles still load, unless you kept the area offline.",
   "settings.endpoints": "Services",
   "settings.endpoints.hint":
     "Leave empty to use the community servers, or enter the address of your own. The address is called from this browser.",
@@ -254,11 +254,27 @@ export const en = {
   "home.local":
     "What you save, your searches and your settings stay in this browser. ways has no account and no server.",
   "home.local.more": "What leaves this device",
-  "search.local": "Local mode: only what you saved is searched.",
+  "search.local": "Local mode: what you saved and the stops of your regions are searched.",
   "stop.local":
     "Local mode: departures are not asked for. Switch the mode to Auto or Online in the settings to see them.",
   "dir.positionNote":
     "Your position is found by this device. It leaves it only as the start of a trip you ask an online service for.",
+  "regions.title": "Regions",
+  "regions.hint":
+    "A region holds a week of timetables, the stops and the streets of an area, built from open data. With one on this device, trips there can be computed with no service and no network. It is downloaded from this site, on your request.",
+  "regions.download": "Download",
+  "regions.update": "Update",
+  "regions.remove": "Remove",
+  "regions.downloading": "{done} of {total} files",
+  "regions.held": "{size} on this device · timetables until {date}",
+  "regions.stale": "The timetables of this region have run out. Update it to plan trips again.",
+  "regions.sources": "From {sources}",
+  "regions.done": "{name} is on this device.",
+  "regions.removed": "{name} removed.",
+  "regions.failed": "The region could not be downloaded. Check your connection and try again.",
+  "regions.catalogError":
+    "The list of regions could not be loaded. The regions already on this device still work.",
+  "regions.none": "No region is offered yet.",
   "unit.min": "{n} min",
   "unit.hmin": "{h} h {m}",
 } as const;

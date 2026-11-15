@@ -22,6 +22,7 @@ import {
 } from "../prefs";
 import { requestSnap } from "../Sheet";
 import { go } from "../state";
+import { Regions } from "./Regions";
 
 function EndpointField({ id, label }: { id: ServiceId; label: string }) {
   const [text, setText] = useState(endpoints.value[id]);
@@ -187,6 +188,11 @@ export function Settings() {
         <p class="muted small">{t("settings.endpoints.hint")}</p>
         <EndpointField id="motis" label={t("settings.endpoint.motis")} />
         <EndpointField id="valhalla" label={t("settings.endpoint.valhalla")} />
+      </section>
+
+      <section class="stack tight">
+        <h3 class="section-title">{t("regions.title")}</h3>
+        <Regions />
       </section>
 
       <section class="stack tight">

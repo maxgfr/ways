@@ -5,6 +5,8 @@
  */
 import { useEffect, useState } from "preact/hooks";
 import { search as searchPlaces } from "../geo/geocode";
+import { searchRegionStops } from "../local/client";
+import { installed } from "../local/packs";
 import { searchStops, SERVICE as TRANSITOUS } from "../providers/motis";
 import type { Point, Vehicle } from "../providers/types";
 import { isAbort } from "../providers/types";
@@ -89,13 +91,36 @@ export function useSearch(q: string, near: [number, number], zoom: number): Sear
   const local = engine.value === "device";
 
   useEffect(() => {
-    if (text.length < MIN_CHARS || local) {
+    if (text.length < MIN_CHARS) {
       setRemote([]);
       setFailed([]);
       setStatus("idle");
       return;
     }
     const controller = new AbortController();
+    if (local) {
+      // No service is asked: the stops of the regions on this device are searched instead.
+      setFailed([]);
+      setStatus("idle");
+      const regions = installed.value;
+      if (regions.length === 0) {
+        setRemote([]);
+        return;
+      }
+      searchRegionStops(regions, text, controller.signal).then((stops) => {
+        if (controller.signal.aborted) return;
+        setRemote(
+          stops.map((s) => ({
+            kind: "stop" as const,
+            source: "stop" as const,
+            point: { lat: s.lat, lng: s.lng, name: s.name },
+            meta: "",
+            key: `region:${s.name}:${s.lat},${s.lng}`,
+          })),
+        );
+      });
+      return () => controller.abort();
+    }
     setStatus("loading");
     const timer = setTimeout(async () => {
       const [stops, places] = await Promise.allSettled([

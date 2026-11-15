@@ -11,8 +11,9 @@
     "typecheck": "tsc --noEmit -p .",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "test": "bun test src scripts",
-    "test:e2e": "bun run build && playwright test"
+    "test": "bun test src scripts data",
+    "regions": "bun data/build.ts dist/packs",
+    "test:e2e": "bun run build && bun data/fixture.ts dist/packs && playwright test"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "5.3.0",
@@ -20,6 +21,7 @@
     "@preact/signals": "2.11.3",
     "lucide": "1.63.0",
     "maplibre-gl": "6.16.0",
+    "minotor": "13.0.0",
     "preact": "10.29.8"
   },
   "devDependencies": {

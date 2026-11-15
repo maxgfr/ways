@@ -40,7 +40,7 @@ export const fr: Record<MessageKey, string> = {
   "dir.failed": "{services} n'a pas répondu. Vérifie ta connexion et réessaie.",
   "dir.fallback": "{services} n'a pas répondu ; ces trajets viennent d'un autre service.",
   "dir.noRegion":
-    "Mode local : aucune région téléchargée sur cet appareil ne couvre ce trajet. Passe le mode sur Auto ou En ligne dans les réglages.",
+    "Mode local : aucune région présente sur cet appareil ne couvre ce trajet. Télécharges-en une dans les réglages, ou passe le mode sur Auto ou En ligne.",
   "dir.origin": "Calculé par {service} ({host}).",
   "dir.origin.device": "Calculé sur cet appareil. Rien n'a été envoyé.",
   "dir.direct": "Direct",
@@ -160,7 +160,7 @@ export const fr: Record<MessageKey, string> = {
   "settings.engine.online.hint":
     "Les trajets sont calculés par Transitous (transports) et Valhalla (vélo, marche). Les deux extrémités du trajet leur sont envoyées.",
   "settings.engine.device.hint":
-    "Aucun service n'est appelé : rien de ce que tu fais ne quitte cet appareil. Les trajets sont calculés dans ce navigateur à partir d'une région téléchargée ; la recherche porte sur ce que tu as enregistré ; arrêts, passages et vélos partagés sont désactivés. Seules les tuiles de carte se chargent encore, sauf si tu as gardé la zone hors ligne. Aucune région n'est encore téléchargeable : aucun trajet ne sera donc trouvé dans ce mode.",
+    "Aucun service n'est appelé : rien de ce que tu fais ne quitte cet appareil. Les trajets sont calculés dans ce navigateur à partir d'une région téléchargée, sur les horaires théoriques uniquement (pas de temps réel). La recherche porte sur ce que tu as enregistré et sur les arrêts de tes régions ; passages et vélos partagés sont désactivés. Seules les tuiles de carte se chargent encore, sauf si tu as gardé la zone hors ligne.",
   "settings.endpoints": "Services",
   "settings.endpoints.hint":
     "Laisse vide pour utiliser les serveurs communautaires, ou saisis l'adresse du tien. L'adresse est appelée depuis ce navigateur.",
@@ -260,11 +260,29 @@ export const fr: Record<MessageKey, string> = {
   "home.local":
     "Ce que tu enregistres, tes recherches et tes réglages restent dans ce navigateur. ways n'a ni compte ni serveur.",
   "home.local.more": "Ce qui quitte cet appareil",
-  "search.local": "Mode local : la recherche porte uniquement sur ce que tu as enregistré.",
+  "search.local":
+    "Mode local : la recherche porte sur ce que tu as enregistré et sur les arrêts de tes régions.",
   "stop.local":
     "Mode local : les passages ne sont pas demandés. Passe le mode sur Auto ou En ligne dans les réglages pour les voir.",
   "dir.positionNote":
     "Ta position est trouvée par cet appareil. Elle ne le quitte que comme point de départ d'un trajet demandé à un service en ligne.",
+  "regions.title": "Régions",
+  "regions.hint":
+    "Une région contient une semaine d'horaires, les arrêts et les rues d'un secteur, construits à partir de données ouvertes. Avec une région sur cet appareil, les trajets s'y calculent sans service ni réseau. Elle est téléchargée depuis ce site, à ta demande.",
+  "regions.download": "Télécharger",
+  "regions.update": "Mettre à jour",
+  "regions.remove": "Supprimer",
+  "regions.downloading": "{done} fichiers sur {total}",
+  "regions.held": "{size} sur cet appareil · horaires jusqu'au {date}",
+  "regions.stale":
+    "Les horaires de cette région sont dépassés. Mets-la à jour pour préparer de nouveaux trajets.",
+  "regions.sources": "Source : {sources}",
+  "regions.done": "{name} est sur cet appareil.",
+  "regions.removed": "{name} supprimée.",
+  "regions.failed": "La région n'a pas pu être téléchargée. Vérifie ta connexion et réessaie.",
+  "regions.catalogError":
+    "La liste des régions n'a pas pu être chargée. Les régions déjà sur cet appareil fonctionnent toujours.",
+  "regions.none": "Aucune région n'est proposée pour l'instant.",
   "unit.min": "{n} min",
   "unit.hmin": "{h} h {m}",
 };

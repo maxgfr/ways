@@ -27,7 +27,7 @@ No backend of its own: the page talks straight to community-run open services (T
 ## Operating Context
 
 - Outdoors on a phone, one hand, variable light and network; and at a desk on a wide screen.
-- Worldwide coverage through the online services. On-device routing only in regions that have a pack (`ways-data` repository, rebuilt nightly from GTFS and OpenStreetMap).
+- Worldwide coverage through the online services. On-device routing only in the regions built for it (`data/regions.json`, rebuilt nightly from GTFS and OpenStreetMap and served with the site). Rennes is the first.
 - Every third-party service is volunteer-run and best-effort. Any of them can be slow, rate-limited or down.
 - Sibling of `spots` on the same origin (`maxgfr.github.io`): storage and cache names are namespaced `ways`.
 
@@ -43,7 +43,7 @@ No backend of its own: the page talks straight to community-run open services (T
 - No server, no account, no analytics, no secret key in the code. Strict CSP. Everything is a static file.
 - Fair use of third-party services is a hard constraint: directions are requested on an explicit action, never while typing; requests are debounced, cancelled and cached.
 - Open source (MIT) and non-commercial, which the Transitous usage policy requires.
-- Undecided: which regions get a pack after Rennes and Lyon; whether a keyed provider (IDFM PRIM) ships.
+- Undecided: which regions come after Rennes; whether a keyed provider (IDFM PRIM) ships.
 
 ## Brand Commitments
 
