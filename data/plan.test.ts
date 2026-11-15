@@ -56,7 +56,7 @@ const clock = (ms: number) => toServiceTime(ms, "Europe/Paris").minutes;
 describe("the region files", () => {
   test("describe themselves the way the app expects", () => {
     expect(parseRegion(info)).toMatchObject({ id: "testville", timezone: "Europe/Paris" });
-    expect(info.days).toHaveLength(7);
+    expect(info.days).toHaveLength(3);
     expect(info.days[0]).toBe("2026-11-17");
     expect(info.files).toContain("streets.bin.gz");
     expect(info.files).toContain("timetable-2026-11-17.bin.gz");

@@ -27,7 +27,8 @@ No backend of its own: the page talks straight to community-run open services (T
 ## Operating Context
 
 - Outdoors on a phone, one hand, variable light and network; and at a desk on a wide screen.
-- Worldwide coverage through the online services. On-device routing only in the regions built for it (`data/regions.json`, rebuilt nightly from GTFS and OpenStreetMap and served with the site). Rennes is the first.
+- Worldwide coverage through the online services. On-device routing wherever offline data exists: the biggest urban networks of the Mobility Database, discovered and rebuilt every night, never chosen by hand. The data downloads by itself where the user looks things up.
+- The map opens where the user is (position already allowed) or on their city from the device's time zone; no network is asked to guess.
 - Every third-party service is volunteer-run and best-effort. Any of them can be slow, rate-limited or down.
 - Sibling of `spots` on the same origin (`maxgfr.github.io`): storage and cache names are namespaced `ways`.
 
@@ -43,7 +44,7 @@ No backend of its own: the page talks straight to community-run open services (T
 - No server, no account, no analytics, no secret key in the code. Strict CSP. Everything is a static file.
 - Fair use of third-party services is a hard constraint: directions are requested on an explicit action, never while typing; requests are debounced, cancelled and cached.
 - Open source (MIT) and non-commercial, which the Transitous usage policy requires.
-- Undecided: which regions come after Rennes; whether a keyed provider (IDFM PRIM) ships.
+- Undecided: whether a keyed provider (IDFM PRIM) ships.
 
 ## Brand Commitments
 

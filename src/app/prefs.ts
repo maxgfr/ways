@@ -64,6 +64,8 @@ interface Prefs {
   engine: Engine;
   endpoints: Record<ServiceId, string>;
   travel: Travel;
+  /** Download the region around what the user looks at, and keep it up to date. */
+  autoRegions: boolean;
 }
 
 const PREFS_KEY = "ways:prefs";
@@ -124,6 +126,7 @@ export function parsePrefs(raw: unknown): Prefs {
       pace: tr.pace === "slow" || tr.pace === "fast" ? tr.pace : DEFAULT_TRAVEL.pace,
       stepFree: bool(tr.stepFree, DEFAULT_TRAVEL.stepFree),
     },
+    autoRegions: bool(r.autoRegions, true),
   };
 }
 
@@ -141,6 +144,7 @@ export const theme = signal<Theme>(initial.theme);
 export const lastView = signal<View | null>(initial.view);
 export const layers = signal<Layers>(initial.layers);
 export const engine = signal<Engine>(initial.engine);
+export const autoRegions = signal<boolean>(initial.autoRegions);
 /** Custom service addresses; an empty string means the default one. */
 export const endpoints = signal<Record<ServiceId, string>>(initial.endpoints);
 
@@ -202,6 +206,7 @@ if (typeof window !== "undefined") {
       engine: engine.value,
       endpoints: endpoints.value,
       travel: travel.value,
+      autoRegions: autoRegions.value,
     };
     try {
       localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));

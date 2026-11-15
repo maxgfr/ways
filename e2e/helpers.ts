@@ -130,16 +130,15 @@ export async function fakeServices(page: Page): Promise<Fakes> {
 }
 
 /**
- * English, the map over the centre of Rennes, whatever the machine's settings. Preferences
- * given here are written once, before the app first loads; what the app saves afterwards is
- * left alone, so a reload shows what a user would see.
+ * English, and a map over a city, whatever the machine's settings. Preferences given here are
+ * written once, before the app first loads; what the app saves afterwards is left alone, so a
+ * reload shows what a user would see. When a test calls this twice, the later call wins.
  */
 export async function setUp(page: Page, prefs: Record<string, unknown> = {}): Promise<void> {
   await page.addInitScript((extra) => {
     if (!localStorage.getItem("ways:lang")) localStorage.setItem("ways:lang", "en");
-    const seeded = Object.keys(extra).length > 0 ? "ways-test:custom" : "ways-test:default";
+    const seeded = `ways-test:${JSON.stringify(extra)}`;
     if (localStorage.getItem(seeded)) return;
-    if (seeded === "ways-test:default" && localStorage.getItem("ways:prefs")) return;
     localStorage.setItem(seeded, "1");
     localStorage.setItem(
       "ways:prefs",

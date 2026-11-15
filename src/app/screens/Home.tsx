@@ -6,13 +6,14 @@ import { useEffect } from "preact/hooks";
 import { distance } from "../../geo/polyline";
 import { formatDistance, t } from "../../i18n";
 import { stopsInView, stopsStatus } from "../../map/layers/stops";
-import { mapCenter } from "../../map/MapView";
+import { mapCenter, showPoint } from "../../map/MapView";
 import { recents, saved, storageError } from "../../store/store";
 import { Icon, type IconName, vehicleIcon } from "../../ui/icons";
+import { locate } from "../actions";
 import { directionsTo, openPlace } from "../nav";
 import { requestSnap } from "../Sheet";
 import { labelParts } from "../search";
-import { go } from "../state";
+import { go, locating, userPosition } from "../state";
 
 function Shortcut({
   icon,
@@ -86,6 +87,27 @@ export function Home() {
       </div>
 
       {storageError.value && <p class="notice">{t("store.error")}</p>}
+
+      {!userPosition.value && (
+        <button
+          type="button"
+          class="row-btn locate-row"
+          disabled={locating.value}
+          onClick={() => locate((pos) => showPoint(pos[0], pos[1], 15))}
+        >
+          <span class="row-icon">
+            <Icon
+              name={locating.value ? "spinner" : "locate"}
+              size={18}
+              {...(locating.value ? { class: "spin" } : {})}
+            />
+          </span>
+          <span class="row-text">
+            <span class="row-name">{t("home.locate")}</span>
+            <span class="row-meta">{t("home.locate.hint")}</span>
+          </span>
+        </button>
+      )}
 
       {saved.value.length > 0 && (
         <section>

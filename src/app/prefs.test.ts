@@ -10,7 +10,13 @@ describe("parsePrefs", () => {
       engine: "auto",
       endpoints: { motis: "", valhalla: "" },
       travel: DEFAULT_TRAVEL,
+      autoRegions: true,
     });
+  });
+
+  test("automatic regions can be turned off", () => {
+    expect(parsePrefs({ autoRegions: false }).autoRegions).toBe(false);
+    expect(parsePrefs({ autoRegions: "no" }).autoRegions).toBe(true);
   });
 
   test("remembers how the user likes to travel", () => {

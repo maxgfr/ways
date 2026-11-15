@@ -220,7 +220,7 @@ test("settings: language, theme and mode are kept; local mode says no region", a
   );
 
   await page.goto(`./#/dir/${GARE}/${KENNEDY}/transit`);
-  await expect(page.getByText(/aucune région présente sur cet appareil/)).toBeVisible();
+  await expect(page.getByText(/n'a pas de données hors ligne pour ce trajet/)).toBeVisible();
 });
 
 test("a custom server address is validated and then used", async ({ page }) => {
@@ -352,7 +352,7 @@ test("local mode calls no service at all", async ({ page }) => {
 
   await page.goto(`./#/dir/${GARE}/${KENNEDY}/bike`);
   await expect(
-    page.getByText(/Local mode: no region on this device covers this trip/),
+    page.getByText(/Local mode: there is no offline data on this device for this trip/),
   ).toBeVisible();
 
   await page.goto("./#/place/48.11270,-1.67720,Parlement%20de%20Bretagne/N101");

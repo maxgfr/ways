@@ -1,5 +1,6 @@
 import { render } from "preact";
 import { App } from "./app/App";
+import { startAutoRegions } from "./app/autoRegions";
 import { deviceLookup } from "./local/client";
 import { setDeviceLookup } from "./providers/router";
 
@@ -8,6 +9,7 @@ setDeviceLookup(deviceLookup);
 
 const root = document.getElementById("app");
 if (root) render(<App />, root);
+startAutoRegions();
 
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
