@@ -93,7 +93,8 @@ function Chips() {
 export function App() {
   const r = route.value;
   const wide = sheetInset.value.left > 0;
-  const floatBottom = wide ? 44 : sheetInset.value.bottom + 14;
+  // On a wide screen the buttons sit above the zoom buttons and the attribution.
+  const floatBottom = wide ? 104 : sheetInset.value.bottom + 14;
   const hideFloat = !wide && sheetInset.value.bottom > window.innerHeight * 0.6;
   // The directions screen has its own two fields; the search steps aside for it.
   const searching = r.name !== "dir";

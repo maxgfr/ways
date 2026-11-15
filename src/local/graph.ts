@@ -57,6 +57,21 @@ export interface StreetOptions {
   stepFree?: boolean;
 }
 
+/** A graph with no streets: every walk falls back to the straight line. */
+export function emptyGraph(): Graph {
+  return {
+    nodeCount: 0,
+    edgeCount: 0,
+    lat: new Int32Array(0),
+    lng: new Int32Array(0),
+    first: new Uint32Array(1),
+    to: new Uint32Array(0),
+    flags: new Uint8Array(0),
+    name: new Uint16Array(0),
+    names: [""],
+  };
+}
+
 const MAGIC = 0x53594157; // "WAYS", little-endian
 const VERSION = 1;
 const HEADER_WORDS = 5;

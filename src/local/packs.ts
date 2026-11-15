@@ -37,9 +37,9 @@ export interface RegionInfo {
 export const PACKS_CACHE = "ways-packs";
 const INSTALLED_KEY = "ways:regions";
 
-/** Where the region files are served from: beside the page. */
+/** Where the region files are served from: a site of their own, on this same origin. */
 export function packsBase(): string {
-  return new URL("./packs/", document.baseURI).href;
+  return new URL("../ways-data/", document.baseURI).href;
 }
 
 export function fileUrl(base: string, region: string, file: string): string {

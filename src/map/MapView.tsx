@@ -9,8 +9,9 @@ import { effect, signal } from "@preact/signals";
 import type { MapLayerTouchEvent, Map as MLMap } from "maplibre-gl";
 import * as maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "preact/hooks";
-import { openPointAt } from "../app/actions";
+import { locate, openPointAt } from "../app/actions";
 import { dark, lastView } from "../app/prefs";
+import { deviceTimezone, positionAllowed, viewForTimezone } from "../app/startView";
 import { pin, route, userAccuracy, userPosition } from "../app/state";
 import { t } from "../i18n";
 import { EMPTY } from "./layers/common";
@@ -92,12 +93,13 @@ export function MapView() {
   useEffect(() => {
     if (!container.current) return;
     maplibregl.setWorkerUrl(new URL("./maplibre-gl-worker.mjs", document.baseURI).href);
-    const view = lastView.value;
+    // Where the user last looked, or else their city as their device's time zone tells it.
+    const view = lastView.value ?? viewForTimezone(deviceTimezone());
     const map = new maplibregl.Map({
       container: container.current,
       style: mapStyle(dark.value),
-      center: view ? [view.lng, view.lat] : [8, 47],
-      zoom: view ? view.zoom : 3.6,
+      center: [view.lng, view.lat],
+      zoom: view.zoom,
       attributionControl: false,
       dragRotate: false,
       pitchWithRotate: false,
@@ -107,6 +109,9 @@ export function MapView() {
     map.touchZoomRotate.disableRotation();
     // Top right, under the chips: the panel covers the bottom of the map on a phone.
     map.addControl(new maplibregl.AttributionControl({ compact: true }), "top-right");
+    // Zoom buttons, for a mouse: on a touch screen the fingers do it.
+    if (matchMedia("(pointer: fine)").matches)
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     container.current.style.background = groundColor(dark.value);
 
     const disposers: (() => void)[] = [];
@@ -120,6 +125,13 @@ export function MapView() {
         ?.classList.remove("maplibregl-compact-show");
       // Set first: a trip opened from a link may already be there to frame.
       mapRef.value = map;
+      // As a map app does: when the user allowed it before, open on where they are. A link to a
+      // place, a stop or a trip keeps its own view.
+      if (route.peek().name === "home") {
+        void positionAllowed().then((allowed) => {
+          if (allowed) locate((pos) => showPoint(pos[0], pos[1], 15));
+        });
+      }
       disposers.push(
         attachCycling(map),
         attachRoute(map, fitBox),

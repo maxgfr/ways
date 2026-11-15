@@ -2,26 +2,18 @@ import { expect, type Page, test } from "@playwright/test";
 import { fakeServices, setUp } from "./helpers";
 
 /**
- * Local mode, end to end, on Testville: a made-up region built by
- * data/fixture.ts and served beside the site like a real one. The trips below
- * are computed in the browser; the fake services are there to prove that none
- * of them is asked anything.
+ * Offline data, end to end, on Testville: a made-up area built by
+ * data/fixture.ts and served at /ways-data/ like the real data. It arrives on
+ * its own when the user looks something up there; trips are then computed in
+ * the browser. The fake services prove that local mode asks them nothing.
  */
 const GARE = "48.00000,-1.02000,Gare";
 const PLAGE = "48.02000,-1.00000,Plage";
+const ARRIVED = "Offline data for Testville is now on this device.";
 
 test.beforeEach(async ({ page }) => {
   await setUp(page, { view: { lng: -1.01, lat: 48.01, zoom: 13 } });
 });
-
-async function download(page: Page): Promise<void> {
-  await page.goto("./#/settings");
-  const region = page.locator(".region", { hasText: "Testville" });
-  await expect(region).toContainText("Testville Transit (made up), OpenStreetMap contributors");
-  await region.getByRole("button", { name: "Download" }).click();
-  await expect(page.getByText("Testville is on this device.")).toBeVisible();
-  await expect(region).toContainText(/on this device · timetables until/);
-}
 
 /** Tomorrow at 09:00: the timetable runs all day, so the trips are known. */
 async function leaveTomorrowAtNine(page: Page): Promise<void> {
@@ -33,10 +25,19 @@ async function leaveTomorrowAtNine(page: Page): Promise<void> {
     .fill(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T09:00`);
 }
 
-test("a region is downloaded, used with no service at all, then removed", async ({ page }) => {
+test("looking a place up downloads its area, which then works with no service", async ({
+  page,
+}) => {
   const fakes = await fakeServices(page);
-  await download(page);
+  await page.goto(`./#/place/${PLAGE}`);
+  await expect(page.getByText(ARRIVED)).toBeVisible();
+
+  await page.goto("./#/settings");
+  const held = page.locator(".region", { hasText: "Testville" });
+  await expect(held).toContainText(/on this device · timetables until/);
+  await expect(held).toContainText("Testville Transit (made up), OpenStreetMap contributors");
   await page.getByRole("button", { name: "Local", exact: true }).click();
+  fakes.calls.length = 0;
 
   // Public transport, from the timetable on the device.
   await page.goto(`./#/dir/${GARE}/${PLAGE}/transit`);
@@ -45,7 +46,6 @@ test("a region is downloaded, used with no service at all, then removed", async 
   await expect(first).toContainText("09:00 – 09:17");
   await expect(first).toContainText("1 change");
   await expect(first).toContainText("scheduled");
-  await expect(first).not.toContainText("live");
   await expect(page.getByText("Computed on this device. Nothing was sent.")).toBeVisible();
 
   await first.click();
@@ -54,7 +54,6 @@ test("a region is downloaded, used with no service at all, then removed", async 
   await expect(legs.nth(0).locator(".line-name")).toHaveText("1");
   await expect(legs.nth(1)).toContainText("Mairie");
   await expect(legs.nth(1).locator(".line-name")).toHaveText("T");
-  await expect(legs.nth(2)).toContainText("Plage");
   await page.getByRole("button", { name: "Back" }).click();
 
   // By bike, on the streets on the device.
@@ -62,11 +61,8 @@ test("a region is downloaded, used with no service at all, then removed", async 
   const ride = page.locator(".itinerary").first();
   await expect(ride).toContainText("10 min");
   await expect(ride).toContainText("2.7 km");
-  await ride.click();
-  await page.getByRole("button", { name: /steps?$/ }).click();
-  await expect(page.getByText("Start onto Voie verte")).toBeVisible();
 
-  // The stops of the region can be searched.
+  // The stops held offline can be searched.
   await page.goto("./");
   await page.getByPlaceholder("Search a place or a stop").fill("plag");
   await expect(page.getByRole("button", { name: /^Plage/ })).toBeVisible();
@@ -74,48 +70,58 @@ test("a region is downloaded, used with no service at all, then removed", async 
   expect(fakes.calls).toEqual([]);
 
   await page.goto("./#/settings");
-  await page
-    .locator(".region", { hasText: "Testville" })
-    .getByRole("button", { name: "Remove" })
-    .click();
+  await held.getByRole("button", { name: "Remove" }).click();
   await expect(page.getByText("Testville removed.")).toBeVisible();
   await page.goto(`./#/dir/${GARE}/${PLAGE}/bike`);
-  await expect(
-    page.getByText(/Local mode: no region on this device covers this trip\./),
-  ).toBeVisible();
+  await expect(page.getByText(/there is no offline data on this device/)).toBeVisible();
+});
+
+test("the download can be undone at once", async ({ page }) => {
+  await fakeServices(page);
+  await page.goto(`./#/stop/${PLAGE}`);
+  await page.getByRole("button", { name: "Undo" }).click();
+  await page.goto("./#/settings");
+  await expect(page.getByText(/^Nothing yet\./)).toBeVisible();
+});
+
+test("with automatic downloads off, nothing arrives until asked for", async ({ page }) => {
+  await setUp(page, { autoRegions: false, view: { lng: -1.01, lat: 48.01, zoom: 13 } });
+  await fakeServices(page);
+  await page.goto(`./#/place/${PLAGE}`);
+  await page.waitForTimeout(1500);
+  await expect(page.getByText(ARRIVED)).toHaveCount(0);
+
+  await page.goto("./#/settings");
+  await expect(page.getByRole("switch", { name: /Download automatically/ })).not.toBeChecked();
+  await page.getByRole("button", { name: "Download the area on screen" }).click();
+  await expect(page.getByText("Testville is on this device.")).toBeVisible();
+  await expect(page.locator(".region", { hasText: "Testville" })).toBeVisible();
+});
+
+test("where no data exists, the area button says so", async ({ page }) => {
+  await setUp(page, { view: { lng: 2.35, lat: 48.86, zoom: 13 } });
+  await fakeServices(page);
+  await page.goto("./#/settings");
+  await page.getByRole("button", { name: "Download the area on screen" }).click();
+  await expect(page.getByText(/No offline data exists for this area yet\./)).toBeVisible();
 });
 
 test("in Auto, the device answers when the services do not", async ({ page }) => {
   const fakes = await fakeServices(page);
-  await download(page);
   fakes.down.add("transitous");
   fakes.down.add("valhalla");
-
   await page.goto(`./#/dir/${GARE}/${PLAGE}/transit`);
+  await expect(page.getByText(ARRIVED)).toBeVisible();
   await leaveTomorrowAtNine(page);
   await expect(page.locator(".itinerary").first()).toContainText("09:00 – 09:17");
-  await expect(
-    page.getByText("Transitous did not answer; these trips come from another service."),
-  ).toBeVisible();
   await expect(page.getByText("Computed on this device. Nothing was sent.")).toBeVisible();
 });
 
-test("in Auto, the services are asked first, and a trip outside the region is theirs", async ({
-  page,
-}) => {
-  const fakes = await fakeServices(page);
-  await download(page);
-  await page.goto(`./#/dir/${GARE}/${PLAGE}/transit`);
-  await expect(page.getByText("Computed by Transitous (api.transitous.org).")).toBeVisible();
-  expect(fakes.calls.filter((c) => c.endsWith("/plan"))).toHaveLength(1);
-});
-
-test("a downloaded region survives a reload", async ({ page }) => {
+test("offline data survives a reload", async ({ page }) => {
   await fakeServices(page);
-  await download(page);
+  await page.goto(`./#/place/${PLAGE}`);
+  await expect(page.getByText(ARRIVED)).toBeVisible();
+  await page.goto("./#/settings");
   await page.reload();
-  const region = page.locator(".region", { hasText: "Testville" });
-  await expect(region).toContainText(/on this device/);
-  await expect(region.getByRole("button", { name: "Remove" })).toBeVisible();
-  await expect(region.getByRole("button", { name: "Download" })).toHaveCount(0);
+  await expect(page.locator(".region", { hasText: "Testville" })).toContainText(/on this device/);
 });

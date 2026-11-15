@@ -64,7 +64,7 @@ const hhmm = (minutes: number): string =>
 
 /** The feed's text files, valid from the day before `now` for a month. */
 export function gtfsFiles(now: number): Record<string, string> {
-  const today = toServiceTime(now, TESTVILLE.timezone).date;
+  const today = toServiceTime(now, "Europe/Paris").date;
   const compact = (d: string) => d.replaceAll("-", "");
   const stops = Object.entries(PLACES)
     .map(([id, p]) => `${id},${p.name},${p.lat},${p.lng}`)
@@ -145,6 +145,6 @@ export async function buildFixture(outdir: string, now = Date.now()): Promise<Pu
 }
 
 if (import.meta.main) {
-  const info = await buildFixture(process.argv[2] ?? "dist/packs");
+  const info = await buildFixture(process.argv[2] ?? "dist-data");
   console.log(`testville: ${info.files.length} files, ${info.bytes} bytes`);
 }

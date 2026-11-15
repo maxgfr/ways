@@ -13,8 +13,9 @@ No account, no server, no API key, no tracking. ways is a static page: your brow
 - **Stops**: next departures, marked _live_ or _scheduled_, delays, cancellations, service alerts, and the run of a line on the map.
 - **Layers**: stops, cycle paths, shared bikes and scooters with what is available now, vehicles in service.
 - **Yours, on your device**: saved places, recent searches, your preferred mode, flatter routes by bike, walking pace, step-free routes, theme and language are kept in this browser and nowhere else.
-- **Offline**: installable; map areas you have seen stay available, and you can keep an area down to street level.
-- **Local mode**: one setting stops every call to a service. With a region downloaded, trips there are computed in your browser: public transport on the timetable, bike and foot on the street network. Nothing about the trip leaves the device.
+- **Opens where you are**: on your position when you allowed it before, otherwise on your city as your device's time zone tells it. No network is asked to guess.
+- **Offline**: installable; map areas you have seen stay available. The timetables and streets of the areas you look things up in download on their own, so trips there keep working without a network.
+- **Local mode**: one setting stops every call to a service. Trips are then computed in your browser from the offline data: public transport on the timetable, bike and foot on the street network. Nothing about the trip leaves the device.
 - English and French.
 
 ## What leaves your device
@@ -28,6 +29,7 @@ Nothing is stored anywhere but your browser. A request leaves only when you do s
 | [Valhalla](https://valhalla.openstreetmap.de/) (FOSSGIS) | Bike and foot routes                                                       | Both ends of the trip and your travel preferences                                         |
 | [Photon](https://photon.komoot.io/) (komoot)             | Place search, address of a pressed point                                   | The text you search and the centre of the map                                             |
 | [Nominatim](https://nominatim.openstreetmap.org/)        | Opening hours, website, phone of a place                                   | The reference of the place whose card you open                                            |
+| This site (`maxgfr.github.io/ways-data`)                 | Offline data for the areas you look things up in                           | Which area's files are downloaded                                                         |
 
 Trips are requested when you ask for one, never while you type. The same list is in the app, under _Data sources_. You can point ways at your own MOTIS and Valhalla servers in the settings.
 
@@ -35,19 +37,17 @@ These services are run by volunteers and answer on a best-effort basis. Map data
 
 ## Three modes
 
-- **Auto** (default): the open services are asked first; when they do not answer and a downloaded region covers the trip, it is computed on the device.
+- **Auto** (default): the open services are asked first; when they do not answer and offline data covers the trip, it is computed on the device.
 - **Online**: Transitous for public transport, Valhalla for bike and foot. Live times where operators publish them, anywhere in the world.
-- **Local**: no service is called at all. Trips come from a downloaded region, on the timetable only (no live times). Search covers what you saved and the stops of your regions. Only map tiles still load, unless you kept the area offline.
+- **Local**: no service is called at all. Trips come from the offline data, on the timetable only (no live times). Search covers what you saved and the stops held offline. Only map tiles still load, unless you kept the area offline.
 
-## Regions
+## Offline data
 
-A region is a few megabytes: a week of timetables, the stops, the colours of the lines and the street network of an area. It is built from the operator's GTFS feed and from OpenStreetMap, every night, by the workflow that publishes the site, and served beside it. You download it from the settings; it stays in the browser's storage until you remove it.
+Nobody picks the cities. Every night, [maxgfr/ways-data](https://github.com/maxgfr/ways-data) reads the [Mobility Database](https://mobilitydatabase.org/) catalogue of the world's public transport feeds, keeps the urban networks, ranks them by the size of their feed and builds the biggest ones, one per city: the next three days of timetables, the stops and line colours from the operator's GTFS feed, and the streets of the city centre from OpenStreetMap. It publishes them at `maxgfr.github.io/ways-data/`, on the same origin as the app.
 
-Available today: **Rennes** (STAR timetables, ODbL).
+In the app, the data of an area downloads by itself when you look up a place, a stop or a trip there, or when your position is in it, and is kept up to date. It is not downloaded on a connection set to save data, and the settings turn it off. They also list what the device holds, with its size, and remove it.
 
-To add one, add an entry to [`data/regions.json`](data/regions.json): a name, a time zone, a bounding box and the address of a GTFS feed that can be downloaded without a key. `bun run regions` builds every region into `dist/packs`.
-
-On the device, public transport is routed with [minotor](https://github.com/aubryio/minotor) (RAPTOR) and the streets with an A\* search over a compact graph (`src/local`), both in a web worker. Lines are drawn straight from stop to stop: a region does not carry the shape of the tracks.
+On the device, public transport is routed with [minotor](https://github.com/aubryio/minotor) (RAPTOR) and the streets with an A\* search over a compact graph (`src/local`), both in a web worker. Lines are drawn straight from stop to stop: the data does not carry the shape of the tracks. Street networks are rebuilt a few per night; until an area has its own, walks there are estimated in a straight line.
 
 ## Development
 
@@ -59,7 +59,7 @@ bun run dev        # http://localhost:5173/ways/
 bun run typecheck
 bun run lint
 bun run test       # unit tests, including routing on a made-up region
-bun run regions    # builds the real regions into dist/packs (after a build)
+bun run regions    # discovers and builds the offline data into dist-data (slow, networked)
 bun run test:e2e   # builds, then Playwright on a desktop and a phone viewport
 ```
 
@@ -73,8 +73,8 @@ src/map        the map and its layers
 src/providers  one module per service, translated into a common model
 src/i18n       translation catalogues (en is the source and the fallback)
 src/store      what the user keeps, in IndexedDB
-src/local      routing on the device: street graph, timetable, worker, regions
-data           builds the regions from GTFS and OpenStreetMap
+src/local      routing on the device: street graph, timetable, worker, offline data
+data           discovers the networks and builds the offline data
 ```
 
 Adding a language: copy `src/i18n/en.ts`, translate the values, register it in `src/i18n/index.ts`.

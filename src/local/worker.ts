@@ -7,7 +7,7 @@
 import { Router, StopsIndex, Timetable } from "minotor";
 import { type Lang, lang } from "../i18n";
 import type { Itinerary, PlanRequest } from "../providers/types";
-import { decodeGraph, indexGraph } from "./graph";
+import { decodeGraph, emptyGraph, indexGraph } from "./graph";
 import { fileUrl, PACKS_CACHE, type RegionInfo } from "./packs";
 import { type LineColours, plan, type RegionData } from "./plan";
 
@@ -48,12 +48,14 @@ const regions = new Map<string, Promise<Loaded>>();
 
 async function load(base: string, region: RegionInfo): Promise<Loaded> {
   const url = (file: string) => fileUrl(base, region.id, file);
+  // A region may come without its streets for a while: walks are then estimated in a straight line.
+  const hasStreets = region.files.includes("streets.bin.gz");
   const [streets, stopsBytes, lines] = await Promise.all([
-    unzipped(url("streets.bin.gz")),
+    hasStreets ? unzipped(url("streets.bin.gz")) : Promise.resolve(null),
     unzipped(url("stops.bin.gz")),
     read(url("lines.json")).then((r) => r.json() as Promise<Record<string, LineColours>>),
   ]);
-  const graph = decodeGraph(streets);
+  const graph = streets ? decodeGraph(streets) : emptyGraph();
   const stops = StopsIndex.fromData(stopsBytes);
   // Timetables are read when a day is first asked for, then kept.
   const routers = new Map<string, Router | null>();
