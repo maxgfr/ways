@@ -241,5 +241,7 @@
   "cat.source": "Places from OpenStreetMap, read from the map already on screen: nothing is sent.",
   "layer.places": "Places",
   "layer.places.hint": "Shops, restaurants, museums and more, from OpenStreetMap. Tap one to see it.",
-  "place.lookup": "Looking for its details…"
+  "place.lookup": "Looking for its details…",
+  "sources.data.use": "Offline data: the timetables, stops and streets of the areas you look things up in, rebuilt every night from open data.",
+  "sources.data.sent": "Receives which area's files are downloaded. It is this same site: nothing goes to a third party."
 }
