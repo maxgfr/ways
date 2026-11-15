@@ -191,6 +191,49 @@ export function toDetails(tags: Record<string, string>): PlaceDetails {
   return out;
 }
 
+const found = new Map<string, string | null>();
+
+/** Lower case without accents or punctuation, to compare two spellings of one name. */
+function plain(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+/**
+ * The OpenStreetMap object behind a named place at a point, for a place known
+ * only by its name and position (one tapped on the map). Found by searching
+ * the name next to the point and keeping a result of the same name within a
+ * short walk. Asked once per place, and remembered.
+ */
+export async function findOsm(
+  name: string,
+  lat: number,
+  lng: number,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  if (!name || !networkAllowed()) return null;
+  const key = `${plain(name)}|${lat.toFixed(5)}|${lng.toFixed(5)}`;
+  if (found.has(key)) return found.get(key) ?? null;
+  const results = await search(name, {
+    near: [lng, lat],
+    zoom: 18,
+    limit: 5,
+    ...(signal ? { signal } : {}),
+  });
+  const wanted = plain(name);
+  const near = (r: GeoResult) =>
+    Math.hypot((r.lat - lat) * 111_200, (r.lng - lng) * 111_200 * Math.cos((lat * Math.PI) / 180)) <
+    120;
+  const hit = results.find((r) => r.osm && near(r) && plain(r.name) === wanted);
+  const osm = hit?.osm ?? null;
+  found.set(key, osm);
+  return osm;
+}
+
 /**
  * The details of one OpenStreetMap object ("N123", "W456", "R789"), from
  * Nominatim. Asked once per place, when its card opens, and remembered.

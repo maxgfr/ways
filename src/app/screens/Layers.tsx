@@ -11,6 +11,7 @@ import { requestSnap } from "../Sheet";
 type Status = "off" | "far" | "local" | "loading" | "ready" | "error";
 
 const ROWS: { id: keyof LayerSet; label: MessageKey; hint: MessageKey }[] = [
+  { id: "places", label: "layer.places", hint: "layer.places.hint" },
   { id: "transit", label: "layer.transit", hint: "layer.transit.hint" },
   { id: "cycling", label: "layer.cycling", hint: "layer.cycling.hint" },
   { id: "rentals", label: "layer.rentals", hint: "layer.rentals.hint" },
@@ -29,6 +30,7 @@ export function Layers() {
   useEffect(() => requestSnap("half"), []);
   const on = layers.value;
   const status: Record<keyof LayerSet, Status> = {
+    places: "ready",
     transit: stopsStatus.value,
     cycling: "ready",
     rentals: rentalsStatus.value,

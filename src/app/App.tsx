@@ -1,5 +1,5 @@
 /**
- * The app: the map, the search field floating over it with the layer chips
+ * The app: the map, the search field floating over it with category shortcuts
  * under it, the floating controls (layers, my position), and the panel holding
  * the current screen.
  */
@@ -8,13 +8,15 @@ import { rentalsStatus } from "../map/layers/rentals";
 import { stopsStatus } from "../map/layers/stops";
 import { vehiclesStatus } from "../map/layers/vehicles";
 import { MapView, sheetInset, showPoint } from "../map/MapView";
-import { Icon, type IconName } from "../ui/icons";
+import { CATEGORIES } from "../map/places";
+import { Icon } from "../ui/icons";
 import { Toasts } from "../ui/ui";
 import { locate } from "./actions";
 import { directionsTo, openHit } from "./nav";
 import { PointPicker } from "./PointPicker";
-import { type Layers as LayerSet, layers, toggleLayer } from "./prefs";
+import { layers } from "./prefs";
 import { currentSnap, Sheet } from "./Sheet";
+import { Category } from "./screens/Category";
 import { Directions } from "./screens/Directions";
 import { Home } from "./screens/Home";
 import { Layers, layerNote } from "./screens/Layers";
@@ -23,7 +25,7 @@ import { Saved } from "./screens/Saved";
 import { Settings } from "./screens/Settings";
 import { Sources } from "./screens/Sources";
 import { Stop } from "./screens/Stop";
-import { go, locating, route, userPosition } from "./state";
+import { back, go, locating, route, userPosition } from "./state";
 
 function Screen() {
   const r = route.value;
@@ -34,6 +36,8 @@ function Screen() {
       return <Stop point={r.point} />;
     case "dir":
       return <Directions r={r} />;
+    case "category":
+      return <Category id={r.id} />;
     case "saved":
       return <Saved />;
     case "layers":
@@ -47,19 +51,14 @@ function Screen() {
   }
 }
 
-const CHIPS: {
-  id: keyof LayerSet;
-  icon: IconName;
-  label: "chip.transit" | "chip.cycling" | "chip.rentals" | "chip.vehicles";
-}[] = [
-  { id: "transit", icon: "bus", label: "chip.transit" },
-  { id: "cycling", icon: "bike", label: "chip.cycling" },
-  { id: "rentals", icon: "scooter", label: "chip.rentals" },
-  { id: "vehicles", icon: "live", label: "chip.vehicles" },
-];
-
+/**
+ * Category shortcuts under the search field, as a map app has them. The layer
+ * switches live behind the layers button; a layer that is on and has nothing
+ * to show at this zoom says so here.
+ */
 function Chips() {
   const on = layers.value;
+  const r = route.value;
   const notes = [
     on.transit ? layerNote(stopsStatus.value) : "",
     on.rentals ? layerNote(rentalsStatus.value) : "",
@@ -67,19 +66,22 @@ function Chips() {
   ].filter(Boolean);
   return (
     <div class="chips-wrap">
-      <fieldset class="chips" aria-label={t("layers.title")}>
-        {CHIPS.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            class="chip"
-            aria-pressed={on[c.id]}
-            onClick={() => toggleLayer(c.id)}
-          >
-            <Icon name={on[c.id] ? "check" : c.icon} size={16} />
-            {t(c.label)}
-          </button>
-        ))}
+      <fieldset class="chips" aria-label={t("cat.title")}>
+        {CATEGORIES.map((c) => {
+          const active = r.name === "category" && r.id === c.id;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              class="chip"
+              aria-pressed={active}
+              onClick={() => (active ? back() : go({ name: "category", id: c.id }))}
+            >
+              <Icon name={c.icon} size={16} />
+              {t(c.label)}
+            </button>
+          );
+        })}
       </fieldset>
       {notes[0] && (
         <p class="chips-note" role="status">

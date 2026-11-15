@@ -10,12 +10,14 @@ import type { MapLayerTouchEvent, Map as MLMap } from "maplibre-gl";
 import * as maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "preact/hooks";
 import { locate, openPointAt } from "../app/actions";
-import { dark, lastView } from "../app/prefs";
+import { dark, lastView, layers } from "../app/prefs";
 import { deviceTimezone, positionAllowed, viewForTimezone } from "../app/startView";
-import { pin, route, userAccuracy, userPosition } from "../app/state";
-import { t } from "../i18n";
+import { go, pin, route, userAccuracy, userPosition } from "../app/state";
+import { lang, t } from "../i18n";
+import { remember } from "../store/store";
 import { EMPTY } from "./layers/common";
 import { attachCycling } from "./layers/cycling";
+import { attachPois, poiLayerSpecs } from "./layers/pois";
 import { attachRentals } from "./layers/rentals";
 import { attachRoute } from "./layers/route";
 import { attachStops } from "./layers/stops";
@@ -95,9 +97,13 @@ export function MapView() {
     maplibregl.setWorkerUrl(new URL("./maplibre-gl-worker.mjs", document.baseURI).href);
     // Where the user last looked, or else their city as their device's time zone tells it.
     const view = lastView.value ?? viewForTimezone(deviceTimezone());
+    const base = mapStyle(dark.value);
     const map = new maplibregl.Map({
       container: container.current,
-      style: mapStyle(dark.value),
+      style: {
+        ...base,
+        layers: [...base.layers, ...poiLayerSpecs(dark.value, lang.value, layers.value.places)],
+      },
       center: [view.lng, view.lat],
       zoom: view.zoom,
       attributionControl: false,
@@ -134,6 +140,11 @@ export function MapView() {
       }
       disposers.push(
         attachCycling(map),
+        attachPois(map, (point) => {
+          // The place is on screen already: its card opens without moving the map.
+          remember("place", point);
+          go({ name: "place", point });
+        }),
         attachRoute(map, fitBox),
         attachStops(map),
         attachRentals(map),

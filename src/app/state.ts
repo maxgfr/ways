@@ -5,6 +5,7 @@
  * nothing about them is stored anywhere to make a link work.
  */
 import { signal } from "@preact/signals";
+import { type CategoryId, categoryById } from "../map/places";
 import type { Point } from "../providers/types";
 import type { TravelMode } from "./prefs";
 
@@ -21,6 +22,7 @@ export type Route =
       /** The itinerary opened in detail, by its position in the list. */
       pick: number | null;
     }
+  | { name: "category"; id: CategoryId }
   | { name: "saved" }
   | { name: "layers" }
   | { name: "settings" }
@@ -78,6 +80,10 @@ export function parseRoute(hash: string): Route {
         pick: Number.isInteger(n) && n >= 0 ? n : null,
       };
     }
+    case "category": {
+      const category = categoryById(rest[0] ?? "");
+      return category ? { name: "category", id: category.id } : { name: "home" };
+    }
     case "saved":
     case "layers":
     case "settings":
@@ -100,6 +106,8 @@ export function href(r: Route): string {
       const end = (p: Point | null) => (p ? encodePoint(p) : "-");
       return `#/dir/${end(r.from)}/${end(r.to)}/${r.mode}${r.pick !== null ? `/${r.pick}` : ""}`;
     }
+    case "category":
+      return `#/category/${r.id}`;
     default:
       return `#/${r.name}`;
   }

@@ -82,6 +82,8 @@ export interface Overlay {
   stopStroke: string;
   ok: string;
   muted: string;
+  /** Search results: a red that stands out from the blue route and the green bikes. */
+  danger: string;
 }
 
 const OVERLAY_LIGHT: Overlay = {
@@ -94,6 +96,7 @@ const OVERLAY_LIGHT: Overlay = {
   stopStroke: "#283040",
   ok: "#1a7f4b",
   muted: "#667085",
+  danger: "#d93025",
 };
 
 const OVERLAY_DARK: Overlay = {
@@ -106,6 +109,7 @@ const OVERLAY_DARK: Overlay = {
   stopStroke: "#dfe4ec",
   ok: "#5fd39a",
   muted: "#98a2b5",
+  danger: "#ff6b5e",
 };
 
 export function overlay(dark: boolean): Overlay {
