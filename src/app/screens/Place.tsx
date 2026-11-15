@@ -4,7 +4,7 @@
  * once on Nominatim when the card opens.
  */
 import { useEffect, useState } from "preact/hooks";
-import { details, type PlaceDetails } from "../../geo/geocode";
+import { details, findOsm, type PlaceDetails } from "../../geo/geocode";
 import { distance } from "../../geo/polyline";
 import { formatDistance, t } from "../../i18n";
 import type { Point } from "../../providers/types";
@@ -61,22 +61,35 @@ export function PlaceActions({
   );
 }
 
-export function Place({ point, osm }: { point: Point; osm?: string }) {
+export function Place({ point, osm: given }: { point: Point; osm?: string }) {
   const [info, setInfo] = useState<PlaceDetails | null>(null);
+  const [osm, setOsm] = useState<string | undefined>(given);
+  const [looking, setLooking] = useState(false);
+  const [name, rest] = labelParts(point.name);
   useEffect(() => requestSnap("half"), [point.lat, point.lng]);
+
+  // A place tapped on the map comes with a name and a position only: its OpenStreetMap
+  // object is looked up by that name next to that point, then its details as usual.
   useEffect(() => {
     setInfo(null);
-    if (!osm) return;
+    setOsm(given);
     const controller = new AbortController();
-    details(osm, controller.signal)
-      .then((d) => {
-        if (!controller.signal.aborted) setInfo(d);
-      })
-      .catch(() => {});
+    const load = async () => {
+      const id =
+        given ?? (name ? await findOsm(name, point.lat, point.lng, controller.signal) : null);
+      if (controller.signal.aborted || !id) return;
+      setOsm(id);
+      const d = await details(id, controller.signal);
+      if (!controller.signal.aborted) setInfo(d);
+    };
+    setLooking(true);
+    load()
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setLooking(false);
+      });
     return () => controller.abort();
-  }, [osm]);
-
-  const [name, rest] = labelParts(point.name);
+  }, [given, point.lat, point.lng, name]);
   const me = userPosition.value;
   const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
   const hasInfo = info && Object.keys(info).length > 0;
@@ -148,6 +161,7 @@ export function Place({ point, osm }: { point: Point; osm?: string }) {
           )}
         </dl>
       )}
+      {looking && !info && <p class="muted small">{t("place.lookup")}</p>}
       {osm && <p class="source-note">{t("place.source")}</p>}
     </div>
   );

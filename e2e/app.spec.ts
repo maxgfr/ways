@@ -5,15 +5,15 @@ test.beforeEach(async ({ page }) => {
   await setUp(page);
 });
 
-test("opens on the map with the search and the layer chips", async ({ page }) => {
+test("opens on the map with the search and the category shortcuts", async ({ page }) => {
   await fakeServices(page);
   await page.goto("./");
   await expect(page.getByRole("application", { name: "Map" })).toBeVisible();
   await expect(page.getByPlaceholder("Search a place or a stop")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Stops", exact: true })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  const shortcuts = page.getByRole("group", { name: "Places nearby" });
+  for (const name of ["Restaurants", "Cafés", "Groceries", "Pharmacies", "Hotels"]) {
+    await expect(shortcuts.getByRole("button", { name })).toBeVisible();
+  }
   // The stops on the map are also a list: platforms of one station appear once.
   await expect(page.getByRole("heading", { name: "Stops around here" })).toBeVisible();
   await expect(page.getByRole("button", { name: /^République/ })).toHaveCount(1);
@@ -251,23 +251,23 @@ test("a custom server address is validated and then used", async ({ page }) => {
   );
 });
 
-test("layers switch from the chips and from the layers screen, and are remembered", async ({
-  page,
-}) => {
+test("layers switch from the layers button, and are remembered", async ({ page }) => {
   const fakes = await fakeServices(page);
   await page.goto("./");
-  await page.getByRole("button", { name: "Shared bikes" }).click();
+  await page.getByRole("button", { name: "Layers", exact: true }).first().click();
+  await expect(page.getByRole("switch", { name: /^Places/ })).toBeChecked();
+  await expect(page.getByRole("switch", { name: /^Stops/ })).toBeChecked();
+  await page.getByRole("switch", { name: /Shared bikes and scooters/ }).check();
   await expect.poll(() => fakes.calls.some((c) => c.endsWith("/rentals"))).toBe(true);
 
-  await page.goto("./#/layers");
   const vehicles = page.getByRole("switch", { name: /Live vehicles/ });
   await expect(vehicles).not.toBeChecked();
-  await expect(page.getByRole("switch", { name: /Shared bikes and scooters/ })).toBeChecked();
   await vehicles.check();
   await expect.poll(() => fakes.calls.some((c) => c.endsWith("/map/trips"))).toBe(true);
 
   await page.reload();
   await expect(page.getByRole("switch", { name: /Live vehicles/ })).toBeChecked();
+  await expect(page.getByRole("switch", { name: /Shared bikes and scooters/ })).toBeChecked();
 });
 
 test("the sources screen names every service the page talks to", async ({ page }) => {
@@ -379,4 +379,30 @@ test.describe("a browser set to German", () => {
       "true",
     );
   });
+});
+
+test("a category lists what the map shows, from the map itself", async ({ page }) => {
+  const fakes = await fakeServices(page);
+  // The real map tiles of central Rennes: the list is read from them, not asked of anyone.
+  await page.goto("./");
+  await page
+    .getByRole("group", { name: "Places nearby" })
+    .getByRole("button", { name: "Restaurants" })
+    .click();
+  await expect(page).toHaveURL(/#\/category\/restaurant$/);
+  await expect(page.getByRole("heading", { name: "Restaurants" })).toBeVisible();
+  const rows = page.locator(".rows .row-btn");
+  await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+  expect(await rows.count()).toBeGreaterThan(3);
+  await expect(
+    page.getByText(/read from the map already on screen: nothing is sent/),
+  ).toBeVisible();
+  // Only the stops layer, which is on, asked anything: the list itself asked no search service.
+  expect(fakes.calls.filter((c) => !c.startsWith("transitous /api/v6/map/"))).toEqual([]);
+
+  // A place of the list opens its card, whose details are looked up by name.
+  const first = (await rows.first().locator(".row-name").textContent()) ?? "";
+  await rows.first().click();
+  await expect(page.getByRole("heading", { name: first })).toBeVisible();
+  await expect.poll(() => fakes.calls.some((c) => c.startsWith("photon"))).toBe(true);
 });

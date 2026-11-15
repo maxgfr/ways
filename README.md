@@ -9,6 +9,8 @@ No account, no server, no API key, no tracking. ways is a static page: your brow
 ## What it does
 
 - **Search** places (Photon) and stops (Transitous), with what you saved and looked up recently first.
+- **Places on the map**: shops, restaurants, museums… with their icon; a tap opens their card, with opening hours, website and phone found automatically.
+- **Categories**: restaurants, cafés, bars, groceries, pharmacies, hotels and museums in the area on screen, listed by distance and marked on the map. Read from the map tiles already on screen: nothing is sent.
 - **Directions** by public transport, bike and foot, with live times where the operator publishes them. Each way of travelling has its own stroke, on the map and in the list: a solid line for a ride, dashes by bike, dots on foot.
 - **Stops**: next departures, marked _live_ or _scheduled_, delays, cancellations, service alerts, and the run of a line on the map.
 - **Layers**: stops, cycle paths, shared bikes and scooters with what is available now, vehicles in service.

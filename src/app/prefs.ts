@@ -11,6 +11,8 @@ export type Theme = "system" | "light" | "dark";
 export type Engine = "auto" | "online" | "device";
 
 export interface Layers {
+  /** Shops, restaurants, museums… from the map's own data. */
+  places: boolean;
   /** Public transport stops. */
   transit: boolean;
   /** Cycle paths and lanes. */
@@ -71,6 +73,7 @@ interface Prefs {
 const PREFS_KEY = "ways:prefs";
 
 export const DEFAULT_LAYERS: Layers = {
+  places: true,
   transit: true,
   cycling: false,
   rentals: false,
@@ -117,6 +120,7 @@ export function parsePrefs(raw: unknown): Prefs {
       cycling: bool(l.cycling, DEFAULT_LAYERS.cycling),
       rentals: bool(l.rentals, DEFAULT_LAYERS.rentals),
       vehicles: bool(l.vehicles, DEFAULT_LAYERS.vehicles),
+      places: bool(l.places, DEFAULT_LAYERS.places),
     },
     engine: r.engine === "online" || r.engine === "device" ? r.engine : "auto",
     endpoints: { motis: cleanEndpoint(e.motis), valhalla: cleanEndpoint(e.valhalla) },

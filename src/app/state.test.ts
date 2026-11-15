@@ -39,6 +39,7 @@ describe("routes", () => {
     { name: "dir", from: null, to: republique, mode: "bike", pick: null },
     { name: "dir", from: { lat: 1, lng: 2, name: "A" }, to: republique, mode: "transit", pick: 2 },
     { name: "dir", from: null, to: null, mode: "walk", pick: null },
+    { name: "category", id: "pharmacy" },
     { name: "saved" },
     { name: "layers" },
     { name: "settings" },
@@ -54,6 +55,7 @@ describe("routes", () => {
     expect(parseRoute("#/nope")).toEqual({ name: "home" });
     expect(parseRoute("#/place/")).toEqual({ name: "home" });
     expect(parseRoute("#/stop/x,y")).toEqual({ name: "home" });
+    expect(parseRoute("#/category/casino")).toEqual({ name: "home" });
   });
 
   test("a trip link with an unknown mode or pick falls back", () => {
