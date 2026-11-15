@@ -60,11 +60,18 @@ export function candidates(csv: string, opts: DiscoverOptions = DEFAULTS): Candi
     if (!url || !r.id || !bbox.every(Number.isFinite)) continue;
     const km = diagonalKm(bbox);
     if (km < opts.minKm || km > opts.maxKm) continue;
-    const place = r["location.municipality"] || r["location.subdivision_name"] || "";
-    const provider = r.provider ?? "";
+    const provider = (r.provider ?? "").trim();
+    // The catalogue's municipality is often the first town of the network in alphabetical order,
+    // so an area is named by its network, and by its region to tell two networks apart.
+    const region = (r["location.subdivision_name"] ?? "").trim();
+    const town = (r["location.municipality"] ?? "").trim();
     out.push({
       id: r.id.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
-      name: place && !provider.includes(place) ? `${place} · ${provider}` : provider || place,
+      name: !provider
+        ? town || region
+        : region && !provider.includes(region)
+          ? `${provider} · ${region}`
+          : provider,
       provider,
       country: r["location.country_code"] ?? "",
       bbox,

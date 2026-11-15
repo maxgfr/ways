@@ -62,6 +62,8 @@ const MAX_FEED_BYTES = env("WAYS_MAX_FEED_MB", 40) * 1024 * 1024;
 const MAX_REGION_BYTES = 60 * 1024 * 1024;
 /** The street network covers at most this many degrees around the centre of the network. */
 const STREETS_HALF_SPAN = 0.08;
+/** A day's timetable this small (serialised) holds no trip. */
+const EMPTY_TIMETABLE_BYTES = 512;
 /** How long one download may take before it is given up for tonight. */
 const FEED_TIMEOUT_MS = 5 * 60_000;
 const OVERPASS_TIMEOUT_MS = 4 * 60_000;
@@ -193,14 +195,19 @@ export async function packRegion(
 
   const today = toServiceTime(now, timezone).date;
   const days: string[] = [];
+  let served = 0;
   for (let i = 0; i < DAYS; i++) {
     const date = addDays(today, i);
     const [y = 1970, m = 1, d = 1] = date.split("-").map(Number);
     // Noon UTC is the same calendar day wherever this script runs.
     const timetable = await parser.parseTimetable(new Date(Date.UTC(y, m - 1, d, 12)));
-    await put(`timetable-${date}.bin.gz`, gzipSync(timetable.serialize()));
+    const bytes = timetable.serialize();
+    if (bytes.length > EMPTY_TIMETABLE_BYTES) served++;
+    await put(`timetable-${date}.bin.gz`, gzipSync(bytes));
     days.push(date);
   }
+  // A feed whose calendar does not reach the coming days gives empty timetables: no use offline.
+  if (served === 0) throw new Error("no service in the coming days");
   log(`${spec.id}: ${stops.size()} stops, timetables for ${days[0]} to ${days[days.length - 1]}`);
 
   const streetsBuilt = await writeStreets(dir);
@@ -268,7 +275,15 @@ async function buildRegion(
   }
 }
 
-export async function buildAll(outdir: string, specs: RegionSpec[]): Promise<Published[]> {
+/**
+ * Builds areas from `specs`, in order, until `limit` of them are published. The specs hold spares:
+ * an area that cannot be built tonight and has no published copy leaves its slot to the next.
+ */
+export async function buildAll(
+  outdir: string,
+  specs: RegionSpec[],
+  limit = specs.length,
+): Promise<Published[]> {
   await mkdir(outdir, { recursive: true });
   const tmp = await mkdtemp(join(tmpdir(), "ways-regions-"));
   const before = await previousIndex();
@@ -279,6 +294,7 @@ export async function buildAll(outdir: string, specs: RegionSpec[]): Promise<Pub
   const index: Published[] = [];
   try {
     for (const spec of specs) {
+      if (index.length >= limit) break;
       const dir = join(outdir, spec.id);
       const previous = before.find((r) => r.id === spec.id);
       await rm(dir, { recursive: true, force: true });
@@ -336,11 +352,11 @@ export async function discover(limit: number): Promise<RegionSpec[]> {
 
 if (import.meta.main) {
   const outdir = resolve(process.argv[2] ?? "dist/data");
-  const specs = await discover(env("WAYS_REGIONS", 40));
-  const index = await buildAll(outdir, specs);
+  const limit = env("WAYS_REGIONS", 40);
+  // Half as many again in reserve, for the networks that cannot be built tonight.
+  const specs = await discover(Math.ceil(limit * 1.5));
+  const index = await buildAll(outdir, specs, limit);
   let total = 0;
   for (const r of index) total += r.bytes;
-  log(
-    `${index.length} of ${specs.length} regions, ${(total / 1024 / 1024).toFixed(0)} MiB, in ${outdir}`,
-  );
+  log(`${index.length} of ${limit} regions, ${(total / 1024 / 1024).toFixed(0)} MiB, in ${outdir}`);
 }

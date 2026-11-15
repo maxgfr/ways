@@ -27,7 +27,13 @@ const city = (id: string, lat: number, lng: number, extra: Record<string, string
 
 const CSV = [
   HEADER,
-  row(city("mdb-1", 48.1, -1.7)),
+  row(
+    city("mdb-1", 48.1, -1.7, {
+      provider: "STAR",
+      "location.subdivision_name": "Bretagne",
+      "location.municipality": "Acigné",
+    }),
+  ),
   row(city("mdb-2", 45.7, 4.8, { provider: "Bus, Tram & Co" })),
   row(city("mdb-3", 48.12, -1.68)), // same city as mdb-1
   row(city("mdb-4", 50, 2, { status: "deprecated" })),
@@ -50,7 +56,9 @@ describe("candidates", () => {
 
   test("names a region by its city and operator, commas and all", () => {
     const [, lyon] = candidates(CSV);
-    expect(lyon?.name).toBe("City mdb-2 · Bus, Tram & Co");
+    expect(lyon?.name).toBe("Bus, Tram & Co");
+    // Named by the network and its region, not by the first town of the network.
+    expect(candidates(CSV)[0]?.name).toBe("STAR · Bretagne");
     for (const [i, v] of [4.65, 45.6, 4.95, 45.8].entries())
       expect(lyon?.bbox[i]).toBeCloseTo(v, 6);
     expect(lyon?.page).toBe("https://mobilitydatabase.org/feeds/gtfs/mdb-2");
