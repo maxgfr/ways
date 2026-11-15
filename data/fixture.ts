@@ -116,12 +116,19 @@ export function gtfsFiles(now: number): Record<string, string> {
   };
 }
 
-/** Writes Testville's region files under `outdir/testville`, and the index beside them. */
-export async function buildFixture(outdir: string, now = Date.now()): Promise<Published> {
+/**
+ * Writes Testville's region files under `outdir/testville`, and the index beside them.
+ * `feedNow` dates the feed's calendar, to build a feed that no longer runs.
+ */
+export async function buildFixture(
+  outdir: string,
+  now = Date.now(),
+  feedNow = now,
+): Promise<Published> {
   const tmp = await mkdtemp(join(tmpdir(), "ways-testville-"));
   try {
     const names: string[] = [];
-    for (const [name, text] of Object.entries(gtfsFiles(now))) {
+    for (const [name, text] of Object.entries(gtfsFiles(feedNow))) {
       await writeFile(join(tmp, name), text);
       names.push(name);
     }

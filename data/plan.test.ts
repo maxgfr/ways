@@ -70,6 +70,20 @@ describe("the region files", () => {
   });
 });
 
+describe("a feed that no longer runs", () => {
+  test("is not built: its timetables would be empty", async () => {
+    const out = await mkdtemp(join(tmpdir(), "ways-expired-"));
+    try {
+      const lastYear = NOW - 400 * 24 * 3600 * 1000;
+      await expect(buildFixture(out, NOW, lastYear)).rejects.toThrow(
+        "no service in the coming days",
+      );
+    } finally {
+      await rm(out, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("planTransit", () => {
   test("bus, then tram, with the change at Mairie", () => {
     const [first] = plan(data, req(), NOW);
