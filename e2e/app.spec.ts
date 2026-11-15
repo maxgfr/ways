@@ -220,7 +220,7 @@ test("settings: language, theme and mode are kept; local mode says no region", a
   );
 
   await page.goto(`./#/dir/${GARE}/${KENNEDY}/transit`);
-  await expect(page.getByText(/aucune région téléchargée sur cet appareil/)).toBeVisible();
+  await expect(page.getByText(/aucune région présente sur cet appareil/)).toBeVisible();
 });
 
 test("a custom server address is validated and then used", async ({ page }) => {
@@ -343,13 +343,17 @@ test("local mode calls no service at all", async ({ page }) => {
   ).toBeVisible();
 
   await page.getByPlaceholder("Search a place or a stop").fill("republique");
-  await expect(page.getByText("Local mode: only what you saved is searched.")).toBeVisible();
+  await expect(
+    page.getByText("Local mode: what you saved and the stops of your regions are searched."),
+  ).toBeVisible();
 
   await page.goto(`./#/stop/${REPUBLIQUE}`);
   await expect(page.getByText(/Local mode: departures are not asked for\./)).toBeVisible();
 
   await page.goto(`./#/dir/${GARE}/${KENNEDY}/bike`);
-  await expect(page.getByText(/Local mode: no region downloaded on this device/)).toBeVisible();
+  await expect(
+    page.getByText(/Local mode: no region on this device covers this trip/),
+  ).toBeVisible();
 
   await page.goto("./#/place/48.11270,-1.67720,Parlement%20de%20Bretagne/N101");
   await expect(page.getByRole("heading", { name: "Parlement de Bretagne" })).toBeVisible();

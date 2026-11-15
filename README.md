@@ -14,7 +14,7 @@ No account, no server, no API key, no tracking. ways is a static page: your brow
 - **Layers**: stops, cycle paths, shared bikes and scooters with what is available now, vehicles in service.
 - **Yours, on your device**: saved places, recent searches, your preferred mode, flatter routes by bike, walking pace, step-free routes, theme and language are kept in this browser and nowhere else.
 - **Offline**: installable; map areas you have seen stay available, and you can keep an area down to street level.
-- **Local mode**: one setting stops every call to a service. Routing on the device itself, from downloadable regions, is being built.
+- **Local mode**: one setting stops every call to a service. With a region downloaded, trips there are computed in your browser: public transport on the timetable, bike and foot on the street network. Nothing about the trip leaves the device.
 - English and French.
 
 ## What leaves your device
@@ -33,6 +33,22 @@ Trips are requested when you ask for one, never while you type. The same list is
 
 These services are run by volunteers and answer on a best-effort basis. Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Timetables come from the operators' own feeds, listed at [transitous.org/sources](https://transitous.org/sources/).
 
+## Three modes
+
+- **Auto** (default): the open services are asked first; when they do not answer and a downloaded region covers the trip, it is computed on the device.
+- **Online**: Transitous for public transport, Valhalla for bike and foot. Live times where operators publish them, anywhere in the world.
+- **Local**: no service is called at all. Trips come from a downloaded region, on the timetable only (no live times). Search covers what you saved and the stops of your regions. Only map tiles still load, unless you kept the area offline.
+
+## Regions
+
+A region is a few megabytes: a week of timetables, the stops, the colours of the lines and the street network of an area. It is built from the operator's GTFS feed and from OpenStreetMap, every night, by the workflow that publishes the site, and served beside it. You download it from the settings; it stays in the browser's storage until you remove it.
+
+Available today: **Rennes** (STAR timetables, ODbL).
+
+To add one, add an entry to [`data/regions.json`](data/regions.json): a name, a time zone, a bounding box and the address of a GTFS feed that can be downloaded without a key. `bun run regions` builds every region into `dist/packs`.
+
+On the device, public transport is routed with [minotor](https://github.com/aubryio/minotor) (RAPTOR) and the streets with an A\* search over a compact graph (`src/local`), both in a web worker. Lines are drawn straight from stop to stop: a region does not carry the shape of the tracks.
+
 ## Development
 
 Needs [Bun](https://bun.sh).
@@ -42,7 +58,8 @@ bun install
 bun run dev        # http://localhost:5173/ways/
 bun run typecheck
 bun run lint
-bun test src scripts
+bun run test       # unit tests, including routing on a made-up region
+bun run regions    # builds the real regions into dist/packs (after a build)
 bun run test:e2e   # builds, then Playwright on a desktop and a phone viewport
 ```
 
@@ -56,6 +73,8 @@ src/map        the map and its layers
 src/providers  one module per service, translated into a common model
 src/i18n       translation catalogues (en is the source and the fallback)
 src/store      what the user keeps, in IndexedDB
+src/local      routing on the device: street graph, timetable, worker, regions
+data           builds the regions from GTFS and OpenStreetMap
 ```
 
 Adding a language: copy `src/i18n/en.ts`, translate the values, register it in `src/i18n/index.ts`.

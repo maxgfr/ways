@@ -1392,6 +1392,51 @@ fieldset {
   color: var(--danger);
 }
 
+.regions {
+  display: flex;
+  flex-direction: column;
+}
+
+.region {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.region + .region {
+  border-top: 1px solid var(--rule);
+}
+
+.region-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.region-name {
+  font-weight: 600;
+}
+
+.region-meta {
+  font-size: 14px;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+.region-warn {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--warn);
+}
+
+.region-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .sources {
   display: flex;
   flex-direction: column;

@@ -122,6 +122,7 @@ export function serviceWorker(files: string[], version: string): string {
 const CACHE = "ways-${version}";
 const TILES = "ways-tiles";
 const KEPT = "ways-tiles-kept";
+const PACKS = "ways-packs";
 const MAX_TILES = 4000;
 const FILES = ${JSON.stringify(["./", ...files.map((f) => `./${f}`)])};
 self.addEventListener("install", (e) => {
@@ -130,7 +131,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("ways-") && k !== CACHE && k !== TILES && k !== KEPT).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("ways-") && k !== CACHE && k !== TILES && k !== KEPT && k !== PACKS).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -220,7 +221,7 @@ export async function build(opts: BuildOptions = {}): Promise<{ outdir: string; 
 
   // 1. The app.
   const app = await Bun.build({
-    entrypoints: [join(ROOT, "index.html")],
+    entrypoints: [join(ROOT, "index.html"), join(ROOT, "src/local/worker.ts")],
     outdir,
     minify,
     splitting: true,
