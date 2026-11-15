@@ -56,4 +56,4 @@ Text on `--paper` meets WCAG AA at every level of ink. The map has its own two p
 
 ## Voice
 
-Short, second person; French uses "tu". An error says what happened and what to do next, and names the service that did not answer.
+Short, second person; French uses "tu", German "du". An error says what happened and what to do next, and names the service that did not answer.

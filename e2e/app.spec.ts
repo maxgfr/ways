@@ -360,3 +360,23 @@ test("local mode calls no service at all", async ({ page }) => {
   await page.waitForTimeout(1500);
   expect(fakes.calls).toEqual([]);
 });
+
+test.describe("a browser set to German", () => {
+  test.use({ locale: "de-DE" });
+
+  test("opens in German, and asks the search service in German", async ({ page }) => {
+    await page.addInitScript(() => localStorage.removeItem("ways:lang"));
+    await fakeServices(page);
+    const asked = page.waitForRequest((r) => r.url().startsWith("https://photon.komoot.io/api"));
+    await page.goto("./");
+    await expect(page.getByPlaceholder("Ort oder Haltestelle suchen")).toBeVisible();
+    await page.getByPlaceholder("Ort oder Haltestelle suchen").fill("parlement");
+    expect(new URL((await asked).url()).searchParams.get("lang")).toBe("de");
+    await page.goto("./#/settings");
+    await expect(page.getByRole("heading", { name: "Einstellungen" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Deutsch" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+});

@@ -1,22 +1,28 @@
 /**
- * Translations. Every user-facing string lives in a catalogue, one file per
- * language: `en.ts` is the source (its keys are the type) and the fallback,
- * `fr.ts` must carry the same keys. `t()` reads the current language; the
- * language follows the browser and a choice made in the settings is remembered.
+ * Translations. Every user-facing string lives in a catalogue, one standard
+ * JSON bundle per language under `locales/`: `en.json` is the source (its keys
+ * are the type) and the fallback; the others carry the same keys, which a test
+ * checks. A new language is a new bundle, written by a translation tool such
+ * as ultrai18n, and one line in LANGS.
+ *
+ * `t()` reads the current language; the language follows the browser and a
+ * choice made in the settings is remembered.
  */
 import { effect, signal } from "@preact/signals";
-import { en, type MessageKey } from "./en";
-import { fr } from "./fr";
+import de from "./locales/de.json";
+import en from "./locales/en.json";
+import fr from "./locales/fr.json";
 
-export type { MessageKey } from "./en";
-export type Lang = "en" | "fr";
+export type MessageKey = keyof typeof en;
+export type Lang = "en" | "fr" | "de";
 
 export const LANGS: { id: Lang; name: string; locale: string }[] = [
   { id: "en", name: "English", locale: "en-GB" },
   { id: "fr", name: "Français", locale: "fr-FR" },
+  { id: "de", name: "Deutsch", locale: "de-DE" },
 ];
 
-const CATALOGUES: Record<Lang, Record<MessageKey, string>> = { en, fr };
+const CATALOGUES: Record<Lang, Partial<Record<MessageKey, string>>> = { en, fr, de };
 const KEY = "ways:lang";
 
 function isLang(v: unknown): v is Lang {
