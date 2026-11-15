@@ -38,3 +38,13 @@ describe("lineColours", () => {
     });
   });
 });
+
+describe("route types", () => {
+  test("extended and basic codes are both read", async () => {
+    const { PROFILE } = await import("./build");
+    expect(PROFILE.routeTypeParser(700)).toBe(4); // bus, extended
+    expect(PROFILE.routeTypeParser(402)).toBe(2); // metro, extended
+    expect(PROFILE.routeTypeParser(3)).toBe(4); // bus, basic
+    expect(PROFILE.routeTypeParser(0)).toBe(1); // tram, basic
+  });
+});
