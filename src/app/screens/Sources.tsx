@@ -61,11 +61,11 @@ const SOURCES: Source[] = [
     linkLabel: "sources.link.policy",
   },
   {
-    name: "ways-data",
-    host: () => "maxgfr.github.io/ways-data",
+    name: "ways",
+    host: () => "maxgfr.github.io/ways/data",
     use: "sources.data.use",
     sent: "sources.data.sent",
-    link: "https://github.com/maxgfr/ways-data",
+    link: "https://github.com/maxgfr/ways#offline-data",
     linkLabel: "sources.link.site",
   },
 ];

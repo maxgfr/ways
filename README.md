@@ -31,7 +31,7 @@ Nothing is stored anywhere but your browser. A request leaves only when you do s
 | [Valhalla](https://valhalla.openstreetmap.de/) (FOSSGIS) | Bike and foot routes                                                       | Both ends of the trip and your travel preferences                                         |
 | [Photon](https://photon.komoot.io/) (komoot)             | Place search, address of a pressed point                                   | The text you search and the centre of the map                                             |
 | [Nominatim](https://nominatim.openstreetmap.org/)        | Opening hours, website, phone of a place                                   | The reference of the place whose card you open                                            |
-| This site (`maxgfr.github.io/ways-data`)                 | Offline data for the areas you look things up in                           | Which area's files are downloaded                                                         |
+| This site (`maxgfr.github.io/ways/data`)                 | Offline data for the areas you look things up in                           | Which area's files are downloaded                                                         |
 
 Trips are requested when you ask for one, never while you type. The same list is in the app, under _Data sources_. You can point ways at your own MOTIS and Valhalla servers in the settings.
 
@@ -45,7 +45,7 @@ These services are run by volunteers and answer on a best-effort basis. Map data
 
 ## Offline data
 
-Nobody picks the cities. Every night, [maxgfr/ways-data](https://github.com/maxgfr/ways-data) reads the [Mobility Database](https://mobilitydatabase.org/) catalogue of the world's public transport feeds, keeps the urban networks, ranks them by the size of their feed and builds the biggest ones, one per city: the next three days of timetables, the stops and line colours from the operator's GTFS feed, and the streets of the city centre from OpenStreetMap. It publishes them at `maxgfr.github.io/ways-data/`, on the same origin as the app.
+Nobody picks the cities. Every night, the deploy workflow (`.github/workflows/pages.yml`, code in `data/`) reads the [Mobility Database](https://mobilitydatabase.org/) catalogue of the world's public transport feeds, keeps the urban networks, ranks them by the size of their feed and builds the biggest ones, one per city: the next three days of timetables, the stops and line colours from the operator's GTFS feed, and the streets of the city centre from OpenStreetMap. It keeps them as one archive on the rolling [`data` release](https://github.com/maxgfr/ways/releases/tag/data), and every deploy unpacks the latest one beside the app, at `maxgfr.github.io/ways/data/`. Areas that cannot be rebuilt one night keep their last files.
 
 In the app, the data of an area downloads by itself when you look up a place, a stop or a trip there, or when your position is in it, and is kept up to date. It is not downloaded on a connection set to save data, and the settings turn it off. They also list what the device holds, with its size, and remove it.
 

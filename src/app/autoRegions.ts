@@ -6,7 +6,7 @@
 import { effect } from "@preact/signals";
 import { t } from "../i18n";
 import { interestIn, refreshHeld } from "../local/auto";
-import { type RegionInfo, remove } from "../local/packs";
+import { dropMovedCopies, type RegionInfo, remove } from "../local/packs";
 import { toast } from "../ui/ui";
 import { autoRegions } from "./prefs";
 import { route, userPosition } from "./state";
@@ -45,7 +45,15 @@ export function startAutoRegions(): () => void {
     lastPosition = key;
     void interestIn(pos[1], pos[0], { onFetched: fetched });
   });
-  if (autoRegions.peek()) void refreshHeld({ onFetched: fetched });
+  void dropMovedCopies().then((lost) => {
+    if (!autoRegions.peek()) return;
+    // Areas held from where the files used to be served come back quietly.
+    for (const r of lost) {
+      const [w, s, e, n] = r.bbox;
+      void interestIn((s + n) / 2, (w + e) / 2, { onFetched: (region) => fetched(region, true) });
+    }
+    void refreshHeld({ onFetched: fetched });
+  });
   return () => {
     stopRoute();
     stopPosition();
