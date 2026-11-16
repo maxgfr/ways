@@ -31,7 +31,8 @@ export const DEFAULT_ENDPOINTS: Record<ServiceId, string> = {
   valhalla: "https://valhalla1.openstreetmap.de",
 };
 
-export type TravelMode = "transit" | "bike" | "walk";
+export type TravelMode = "transit" | "car" | "bike" | "walk";
+export const TRAVEL_MODES: readonly TravelMode[] = ["transit", "car", "bike", "walk"];
 export type Pace = "slow" | "normal" | "fast";
 
 /** How the user likes to travel. Sent only as parameters of a trip request. */
@@ -44,6 +45,10 @@ export interface Travel {
   pace: Pace;
   /** Avoid stairs: ramps and lifts only, on foot and when changing lines. */
   stepFree: boolean;
+  /** By car, keep off toll roads. */
+  avoidTolls: boolean;
+  /** By car, keep off motorways. */
+  avoidMotorways: boolean;
 }
 
 export const DEFAULT_TRAVEL: Travel = {
@@ -51,6 +56,8 @@ export const DEFAULT_TRAVEL: Travel = {
   avoidHills: false,
   pace: "normal",
   stepFree: false,
+  avoidTolls: false,
+  avoidMotorways: false,
 };
 
 export interface View {
@@ -125,10 +132,12 @@ export function parsePrefs(raw: unknown): Prefs {
     engine: r.engine === "online" || r.engine === "device" ? r.engine : "auto",
     endpoints: { motis: cleanEndpoint(e.motis), valhalla: cleanEndpoint(e.valhalla) },
     travel: {
-      mode: tr.mode === "bike" || tr.mode === "walk" ? tr.mode : DEFAULT_TRAVEL.mode,
+      mode: TRAVEL_MODES.find((m) => m === tr.mode) ?? DEFAULT_TRAVEL.mode,
       avoidHills: bool(tr.avoidHills, DEFAULT_TRAVEL.avoidHills),
       pace: tr.pace === "slow" || tr.pace === "fast" ? tr.pace : DEFAULT_TRAVEL.pace,
       stepFree: bool(tr.stepFree, DEFAULT_TRAVEL.stepFree),
+      avoidTolls: bool(tr.avoidTolls, DEFAULT_TRAVEL.avoidTolls),
+      avoidMotorways: bool(tr.avoidMotorways, DEFAULT_TRAVEL.avoidMotorways),
     },
     autoRegions: bool(r.autoRegions, true),
   };

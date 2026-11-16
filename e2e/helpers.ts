@@ -16,6 +16,8 @@ export interface Fakes {
   calls: string[];
   /** Services that answer 503 until taken out of the set. */
   down: Set<"transitous" | "valhalla" | "photon">;
+  /** The trip requests sent to Valhalla, as parsed from their `json` parameter. */
+  valhalla: { costing?: string; costing_options?: Record<string, Record<string, number>> }[];
 }
 
 const json = (route: Route, body: unknown) =>
@@ -27,7 +29,7 @@ const json = (route: Route, body: unknown) =>
  * thing left to the network.
  */
 export async function fakeServices(page: Page): Promise<Fakes> {
-  const fakes: Fakes = { calls: [], down: new Set() };
+  const fakes: Fakes = { calls: [], down: new Set(), valhalla: [] };
 
   await page.route("https://api.transitous.org/**", (route) => {
     const url = new URL(route.request().url());
@@ -62,6 +64,9 @@ export async function fakeServices(page: Page): Promise<Fakes> {
 
   await page.route("https://valhalla1.openstreetmap.de/**", (route) => {
     fakes.calls.push("valhalla /route");
+    fakes.valhalla.push(
+      JSON.parse(new URL(route.request().url()).searchParams.get("json") ?? "{}"),
+    );
     if (fakes.down.has("valhalla")) return route.fulfill({ status: 503 });
     return json(route, fakeValhalla);
   });

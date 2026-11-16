@@ -140,6 +140,10 @@ export interface PlanRequest {
   pace?: Pace;
   /** Ramps and lifts only. */
   stepFree?: boolean;
+  /** By car, keep off toll roads. */
+  avoidTolls?: boolean;
+  /** By car, keep off motorways. */
+  avoidMotorways?: boolean;
   /** Epoch milliseconds; "now" when absent. */
   time?: number;
   /** True when `time` is the latest arrival rather than the earliest departure. */

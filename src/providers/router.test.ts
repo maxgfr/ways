@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { chain, onlineRouters } from "./router";
+import { chain, onlineRouters, planTrip, setDeviceLookup } from "./router";
 import type { PlanRequest, Router } from "./types";
 
 const req = (mode: PlanRequest["mode"]): PlanRequest => ({
@@ -19,6 +19,22 @@ describe("onlineRouters", () => {
     expect(names(onlineRouters("transit"))).toEqual(["Transitous"]);
     expect(names(onlineRouters("bike"))).toEqual(["Valhalla (FOSSGIS)", "Transitous"]);
     expect(names(onlineRouters("walk"))).toEqual(["Valhalla (FOSSGIS)", "Transitous"]);
+    expect(names(onlineRouters("car"))).toEqual(["Valhalla (FOSSGIS)", "Transitous"]);
+  });
+});
+
+describe("planTrip", () => {
+  test("in local mode, a car trip says the device cannot drive", async () => {
+    setDeviceLookup(() => device);
+    const out = await planTrip(req("car"), "device");
+    setDeviceLookup(() => null);
+    expect(out).toEqual({ itineraries: [], failed: [], noRegion: false, noDeviceMode: true });
+  });
+
+  test("in local mode, a bike trip without a region says so", async () => {
+    const out = await planTrip(req("bike"), "device");
+    expect(out.noRegion).toBe(true);
+    expect(out.noDeviceMode).toBe(false);
   });
 });
 

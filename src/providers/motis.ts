@@ -316,7 +316,12 @@ function api(path: string, params: Record<string, string | undefined>): URL {
   return url;
 }
 
-const DIRECT: Record<TravelMode, string> = { transit: "WALK", bike: "BIKE", walk: "WALK" };
+const DIRECT: Record<TravelMode, string> = {
+  transit: "WALK",
+  car: "CAR",
+  bike: "BIKE",
+  walk: "WALK",
+};
 
 async function planOnce(req: PlanRequest, useStops: boolean): Promise<Itinerary[]> {
   const url = api("/api/v6/plan", {

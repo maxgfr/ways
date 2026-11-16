@@ -12,7 +12,7 @@ import { LineBadge, ScreenHead, Segmented, Toggle } from "../../ui/ui";
 import { locate } from "../actions";
 import { fullLabel } from "../nav";
 import { type Extra, PointPicker } from "../PointPicker";
-import { setTravel, type TravelMode, travel } from "../prefs";
+import { setTravel, TRAVEL_MODES, type TravelMode, travel } from "../prefs";
 import { requestSnap } from "../Sheet";
 import { labelParts } from "../search";
 import { go, locating, type Route, userPosition, type When, when } from "../state";
@@ -21,7 +21,12 @@ import { Alerts } from "./Stop";
 
 type DirRoute = Extract<Route, { name: "dir" }>;
 
-const MODE_ICON: Record<TravelMode, IconName> = { transit: "bus", bike: "bike", walk: "foot" };
+export const MODE_ICON: Record<TravelMode, IconName> = {
+  transit: "bus",
+  car: "car",
+  bike: "bike",
+  walk: "foot",
+};
 
 function toLocalInput(ms: number): string {
   const d = new Date(ms);
@@ -139,7 +144,20 @@ function Options({ mode }: { mode: TravelMode }) {
         <Icon name="down" size={16} />
       </summary>
       <div class="options-body">
-        {mode === "bike" ? (
+        {mode === "car" ? (
+          <>
+            <Toggle
+              label={t("pref.avoidTolls")}
+              checked={p.avoidTolls}
+              onChange={(avoidTolls) => setTravel({ avoidTolls })}
+            />
+            <Toggle
+              label={t("pref.avoidMotorways")}
+              checked={p.avoidMotorways}
+              onChange={(avoidMotorways) => setTravel({ avoidMotorways })}
+            />
+          </>
+        ) : mode === "bike" ? (
           <Toggle
             label={t("pref.avoidHills")}
             hint={t("pref.avoidHills.hint")}
@@ -423,18 +441,20 @@ function Results({ r }: { r: DirRoute }) {
       </ul>
     );
   }
-  const { itineraries, failed, noRegion } = state.outcome;
+  const { itineraries, failed, noRegion, noDeviceMode } = state.outcome;
   if (itineraries.length === 0) {
     return (
       <div class="stack">
         <p class="notice">
-          {noRegion
-            ? t("dir.noRegion")
-            : failed.length > 0
-              ? t("dir.failed", { services: failed.join(", ") })
-              : t("dir.none")}
+          {noDeviceMode
+            ? t("dir.noDeviceMode")
+            : noRegion
+              ? t("dir.noRegion")
+              : failed.length > 0
+                ? t("dir.failed", { services: failed.join(", ") })
+                : t("dir.none")}
         </p>
-        {noRegion ? (
+        {noRegion || noDeviceMode ? (
           <button type="button" class="btn" onClick={() => go({ name: "settings" })}>
             <Icon name="settings" size={18} />
             {t("home.settings")}
@@ -479,7 +499,7 @@ export function Directions({ r }: { r: DirRoute }) {
       <Segmented
         label={t("dir.mode")}
         value={r.mode}
-        options={(["transit", "bike", "walk"] as const).map((id) => ({
+        options={TRAVEL_MODES.map((id) => ({
           id,
           label: t(`mode.${id}`),
           icon: MODE_ICON[id],

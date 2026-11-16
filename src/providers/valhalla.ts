@@ -1,5 +1,5 @@
 /**
- * Bike and foot routes from Valhalla, on the server FOSSGIS runs for the
+ * Car, bike and foot routes from Valhalla, on the server FOSSGIS runs for the
  * OpenStreetMap community: turn-by-turn instructions in the user's language
  * and the terrain along the way. Fair use: one call at a time per user, and
  * the app names itself in a header, as the operators ask.
@@ -8,7 +8,17 @@ import { endpoint, hostOf } from "../app/prefs";
 import { decodePolyline } from "../geo/polyline";
 import { locale } from "../i18n";
 import { getJson } from "./http";
-import type { Itinerary, Leg, Origin, PlanRequest, Router, Step } from "./types";
+import type {
+  Itinerary,
+  Leg,
+  LegKind,
+  Origin,
+  PlanRequest,
+  Router,
+  Step,
+  TravelMode,
+  Vehicle,
+} from "./types";
 
 export const SERVICE = "Valhalla (FOSSGIS)";
 const CLIENT_ID = "ways (https://github.com/maxgfr/ways)";
@@ -50,6 +60,14 @@ export function climb(heights: number[]): { ascent: number; descent: number } {
   return { ascent: Math.round(ascent), descent: Math.round(descent) };
 }
 
+/** How each mode is costed by Valhalla and named in a leg. */
+const STREET: Record<TravelMode, { costing: string; kind: LegKind; vehicle: Vehicle }> = {
+  transit: { costing: "pedestrian", kind: "walk", vehicle: "foot" },
+  car: { costing: "auto", kind: "car", vehicle: "car" },
+  bike: { costing: "bicycle", kind: "bike", vehicle: "bike" },
+  walk: { costing: "pedestrian", kind: "walk", vehicle: "foot" },
+};
+
 export function toItinerary(
   trip: Trip,
   req: PlanRequest,
@@ -75,8 +93,8 @@ export function toItinerary(
     req.arriveBy && req.time !== undefined ? req.time - seconds * 1000 : (req.time ?? now);
   const end = start + seconds * 1000;
   const leg: Leg = {
-    kind: req.mode === "bike" ? "bike" : "walk",
-    vehicle: req.mode === "bike" ? "bike" : "foot",
+    kind: STREET[req.mode].kind,
+    vehicle: STREET[req.mode].vehicle,
     from: { name: req.from.name, lat: req.from.lat, lng: req.from.lng, departure: start },
     to: { name: req.to.name, lat: req.to.lat, lng: req.to.lng, arrival: end },
     start,
@@ -114,6 +132,11 @@ const WALKING_SPEED = { slow: 3.6, normal: 5.1, fast: 6.4 } as const;
 /** The traveller's preferences, in Valhalla's terms. */
 export function costingOptions(req: PlanRequest): Record<string, number> {
   if (req.mode === "bike") return { use_hills: req.avoidHills ? 0.1 : 0.5 };
+  if (req.mode === "car")
+    return {
+      ...(req.avoidTolls ? { use_tolls: 0 } : {}),
+      ...(req.avoidMotorways ? { use_highways: 0 } : {}),
+    };
   return {
     walking_speed: WALKING_SPEED[req.pace ?? "normal"],
     ...(req.stepFree ? { step_penalty: 600, max_grade: 6 } : {}),
@@ -121,7 +144,7 @@ export function costingOptions(req: PlanRequest): Record<string, number> {
 }
 
 export async function route(req: PlanRequest): Promise<Itinerary[]> {
-  const costing = req.mode === "bike" ? "bicycle" : "pedestrian";
+  const costing = STREET[req.mode].costing;
   const body = {
     locations: [
       { lat: req.from.lat, lon: req.from.lng },
@@ -132,7 +155,8 @@ export async function route(req: PlanRequest): Promise<Itinerary[]> {
     units: "kilometers",
     language: locale(),
     alternates: 2,
-    elevation_interval: 30,
+    // Climbs matter on foot and by bike, not at the wheel.
+    ...(req.mode === "car" ? {} : { elevation_interval: 30 }),
   };
   const url = new URL(`${endpoint("valhalla")}/route`);
   url.searchParams.set("json", JSON.stringify(body));
@@ -154,6 +178,6 @@ export const valhallaRouter: Router = {
   get origin() {
     return origin();
   },
-  modes: ["bike", "walk"],
+  modes: ["car", "bike", "walk"],
   plan: route,
 };

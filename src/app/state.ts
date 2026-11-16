@@ -7,7 +7,7 @@
 import { signal } from "@preact/signals";
 import { type CategoryId, categoryById } from "../map/places";
 import type { Point } from "../providers/types";
-import type { TravelMode } from "./prefs";
+import { TRAVEL_MODES, type TravelMode } from "./prefs";
 
 export type Route =
   | { name: "home" }
@@ -27,8 +27,6 @@ export type Route =
   | { name: "layers" }
   | { name: "settings" }
   | { name: "sources" };
-
-const MODES: TravelMode[] = ["transit", "bike", "walk"];
 
 export function encodePoint(p: Point): string {
   const parts = [p.lat.toFixed(5), p.lng.toFixed(5), encodeURIComponent(p.name)];
@@ -70,7 +68,7 @@ export function parseRoute(hash: string): Route {
       return point ? { name: "stop", point } : { name: "home" };
     }
     case "dir": {
-      const mode = MODES.find((m) => m === rest[2]) ?? "transit";
+      const mode = TRAVEL_MODES.find((m) => m === rest[2]) ?? "transit";
       const n = rest[3] === undefined || rest[3] === "" ? Number.NaN : Number(rest[3]);
       return {
         name: "dir",
