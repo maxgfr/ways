@@ -102,7 +102,10 @@ test("recents can be removed one by one, cleared, or not kept at all", async ({ 
   await expect(page.getByRole("heading", { name: "République" })).toBeVisible();
 
   await page.goBack();
-  const recent = page.locator("section", { has: page.getByRole("heading", { name: "Recent" }) });
+  // The section whose own head says Recent, not the panel around every section.
+  const recent = page.locator("section:has(> .section-head)", {
+    has: page.getByRole("heading", { name: "Recent" }),
+  });
   await expect(recent.getByRole("button", { name: /^République/ })).toBeVisible();
   await recent.getByRole("button", { name: /^Remove République.* from recents$/ }).click();
   await expect(recent).toHaveCount(0);
