@@ -85,6 +85,8 @@ jobs:
 
   deploy:
     needs: build
+    # Spelled out: by default a job is skipped when any job before it was, and "data" often is.
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
