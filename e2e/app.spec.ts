@@ -93,6 +93,39 @@ test("saving keeps a place in this browser, across a reload", async ({ page }) =
   await expect(page.getByText("Nothing saved yet.")).toBeVisible();
 });
 
+test("recents can be removed one by one, cleared, or not kept at all", async ({ page }) => {
+  await fakeServices(page);
+  await page.goto("./");
+  const search = page.getByPlaceholder("Search a place or a stop");
+  await search.fill("republique");
+  await page.getByRole("button", { name: /République Rennes/ }).click();
+  await expect(page.getByRole("heading", { name: "République" })).toBeVisible();
+
+  await page.goBack();
+  const recent = page.locator("section", { has: page.getByRole("heading", { name: "Recent" }) });
+  await expect(recent.getByRole("button", { name: /^République/ })).toBeVisible();
+  await recent.getByRole("button", { name: /^Remove République.* from recents$/ }).click();
+  await expect(recent).toHaveCount(0);
+
+  await search.fill("republique");
+  await page.getByRole("button", { name: /République Rennes/ }).click();
+  await expect(page.getByRole("heading", { name: "République" })).toBeVisible();
+  await page.goBack();
+  await recent.getByRole("button", { name: "Clear" }).click();
+  await expect(recent).toHaveCount(0);
+
+  // Turned off, nothing is kept any more.
+  await page.getByRole("button", { name: "Settings" }).first().click();
+  await page.getByText("Keep recent places").click();
+  await page.goBack();
+  await search.fill("republique");
+  await page.getByRole("button", { name: /République Rennes/ }).click();
+  await expect(page.getByRole("heading", { name: "République" })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Stops around here" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Recent" })).toHaveCount(0);
+});
+
 test("directions by transit: the list, then the trip leg by leg", async ({ page }) => {
   const fakes = await fakeServices(page);
   await page.goto(`./#/dir/${GARE}/${KENNEDY}/transit`);
