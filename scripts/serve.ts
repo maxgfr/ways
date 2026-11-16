@@ -1,7 +1,7 @@
 /**
  * Static server for the dev loop and the end-to-end tests. It serves the app
- * under /ways/ from dist/, and the regions under /ways-data/ from dist-data/,
- * the same two paths they have once published.
+ * under /ways/ from dist/, and the regions under /ways/data/ from dist-data/,
+ * where the deploy unpacks them.
  */
 import { join, normalize } from "node:path";
 
@@ -15,9 +15,9 @@ export function serveApp(opts: { port: number; dir: string; dataDir?: string }) 
       const url = new URL(req.url);
       let path = decodeURIComponent(url.pathname);
       let dir = opts.dir;
-      if (path.startsWith("/ways-data/")) {
+      if (path.startsWith("/ways/data/")) {
         dir = dataDir;
-        path = path.slice("/ways-data".length);
+        path = path.slice("/ways/data".length);
       } else path = path.replace(/^\/ways(?=\/|$)/, "");
       if (path === "" || path.endsWith("/")) path += "index.html";
       const file = Bun.file(join(dir, normalize(path).replace(/^(\.\.[/\\])+/, "")));

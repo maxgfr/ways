@@ -37,9 +37,30 @@ export interface RegionInfo {
 export const PACKS_CACHE = "ways-packs";
 const INSTALLED_KEY = "ways:regions";
 
-/** Where the region files are served from: a site of their own, on this same origin. */
+/** Where the region files are served from: the data/ folder of the app's own site. */
 export function packsBase(): string {
-  return new URL("../ways-data/", document.baseURI).href;
+  return new URL("data/", document.baseURI).href;
+}
+
+/**
+ * Forgets the copies downloaded from where the files used to be served (a
+ * site of their own, before they moved beside the app): the worker would no
+ * longer find them. Returns the areas they belonged to, to download again.
+ */
+export async function dropMovedCopies(): Promise<RegionInfo[]> {
+  if (typeof caches === "undefined") return [];
+  const base = packsBase();
+  const cache = await caches.open(PACKS_CACHE);
+  const moved = new Set<string>();
+  for (const request of await cache.keys()) {
+    if (request.url.startsWith(base)) continue;
+    const id = request.url.split("/").at(-2);
+    if (id) moved.add(id);
+    await cache.delete(request);
+  }
+  const lost = installed.value.filter((r) => moved.has(r.id));
+  if (lost.length > 0) writeInstalled(installed.value.filter((r) => !moved.has(r.id)));
+  return lost;
 }
 
 export function fileUrl(base: string, region: string, file: string): string {

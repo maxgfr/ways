@@ -8,8 +8,8 @@
  *
  *   bun data/build.ts <outdir>
  *
- * The output is a site of its own (index.json and one folder per region),
- * published beside the app on the same origin. The nightly job is gentle with
+ * The output is a folder (index.json and one folder per region) that the
+ * deploy serves at /ways/data/, beside the app. The nightly job is gentle with
  * the services it reads and never fails as a whole: a region that cannot be
  * built today keeps its published files, the street networks are rebuilt a few
  * per night in rotation, and the run stops starting new work when its time is
@@ -55,8 +55,8 @@ const env = (name: string, fallback: number): number => {
   return Number.isFinite(v) && v > 0 ? v : fallback;
 };
 
-const SITE = process.env.WAYS_DATA_SITE ?? "https://maxgfr.github.io/ways-data/";
-const AGENT = "ways-data (https://github.com/maxgfr/ways)";
+const SITE = process.env.WAYS_DATA_SITE ?? "https://maxgfr.github.io/ways/data/";
+const AGENT = "ways (https://github.com/maxgfr/ways)";
 /** Days of timetables per region. Rebuilt every night, so a few are enough. */
 const DAYS = 3;
 const STREETS_MAX_AGE_MS = 28 * 24 * 3600 * 1000;

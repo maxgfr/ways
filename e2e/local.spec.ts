@@ -3,7 +3,7 @@ import { fakeServices, setUp } from "./helpers";
 
 /**
  * Offline data, end to end, on Testville: a made-up area built by
- * data/fixture.ts and served at /ways-data/ like the real data. It arrives on
+ * data/fixture.ts and served at /ways/data/ like the real data. It arrives on
  * its own when the user looks something up there; trips are then computed in
  * the browser. The fake services prove that local mode asks them nothing.
  */

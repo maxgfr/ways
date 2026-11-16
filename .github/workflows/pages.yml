@@ -3,19 +3,61 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Every night the offline data is rebuilt: it carries the next three days of timetables.
+  schedule:
+    - cron: "17 2 * * *"
   workflow_dispatch:
+    inputs:
+      data:
+        description: Rebuild the offline data before deploying
+        type: boolean
+        default: false
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
+  # Builds the offline data and keeps it, as one archive, on the rolling "data" release.
+  data:
+    if: github.event_name == 'schedule' || inputs.data
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    permissions:
+      contents: write
+    concurrency:
+      group: data
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      # Areas that cannot be built tonight keep the files published last time.
+      - name: Discover the networks and build their data
+        run: bun data/build.ts dist-data
+        env:
+          WAYS_REGIONS: "40"
+          WAYS_STREETS_PER_RUN: "8"
+          WAYS_BUDGET_MIN: "200"
+      - name: Publish the data on the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          tar -czf ways-data.tar.gz -C dist-data .
+          gh release view data -R "$REPO" > /dev/null 2>&1 ||
+            gh release create data -R "$REPO" --prerelease --title "Offline data" --notes "Offline data."
+          gh release upload data -R "$REPO" --clobber ways-data.tar.gz dist-data/index.json
+          areas=$(jq length dist-data/index.json)
+          gh release edit data -R "$REPO" --notes "Offline data for $areas areas, built $(date -u '+%Y-%m-%d %H:%M') UTC by the nightly deploy and served at https://maxgfr.github.io/ways/data/. Rebuilt every night: do not link to a fixed copy."
+
   build:
+    needs: data
+    # Also when the data could not be rebuilt tonight: the last archive is deployed again.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -27,8 +69,15 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run test
       - run: bun run build
-      # The offline data is built and published every night by maxgfr/ways-data,
-      # at /ways-data/ on this same origin.
+      - name: Add the offline data from the release, under /ways/data/
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir -p dist/data
+          gh release download data -R "$REPO" --pattern ways-data.tar.gz --dir "$RUNNER_TEMP"
+          tar -xzf "$RUNNER_TEMP/ways-data.tar.gz" -C dist/data
+          test -s dist/data/index.json
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
@@ -37,6 +86,12 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

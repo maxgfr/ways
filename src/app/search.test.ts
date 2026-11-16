@@ -1,6 +1,69 @@
 import { describe, expect, test } from "bun:test";
 import type { Recent, Saved } from "../store/store";
-import { fold, labelParts, localHits } from "./search";
+import { fold, type Hit, labelParts, localHits, matchShare, rankRemote } from "./search";
+
+const PARIS: [number, number] = [2.3522, 48.8566];
+
+function stop(name: string, lat: number, lng: number): Hit {
+  return {
+    kind: "stop",
+    source: "stop",
+    point: { lat, lng, name, stopId: name },
+    meta: "",
+    key: `stop:${name}`,
+  };
+}
+
+function place(name: string, meta: string, lat = 48.856, lng = 2.36): Hit {
+  return {
+    kind: "place",
+    source: "place",
+    point: { lat, lng, name },
+    meta,
+    key: `place:${name}:${meta}:${lat}`,
+  };
+}
+
+describe("matchShare", () => {
+  test("counts the typed words that start a word of the name, short words and numbers aside", () => {
+    expect(matchShare("10 rue de rivoli", "Louvre - Rivoli")).toBe(0.5);
+    expect(matchShare("chatelet", "Châtelet - Les Halles")).toBe(1);
+    expect(matchShare("rue rivoli", "Haute-Rivoire - Rue De L'Ecole")).toBe(0.5);
+    expect(matchShare("12", "Anything")).toBe(0);
+  });
+});
+
+describe("rankRemote", () => {
+  test("puts the address first and drops stops that only look alike", () => {
+    const ranked = rankRemote(
+      "10 rue de rivoli",
+      [
+        stop("Louvre - Rivoli", 48.861, 2.341),
+        stop("Rue des Olivettes", 48.79, 2.32),
+        stop("Haute-Rivoire - Rue De L'Ecole", 45.71, 4.39),
+      ],
+      [place("10 Rue de Rivoli", "75004 Paris"), place("10 Rue de Rivoli", "75004 Paris", 48.8561)],
+      PARIS,
+    );
+    expect(ranked.map((h) => h.point.name)).toEqual(["10 Rue de Rivoli"]);
+  });
+
+  test("puts a stop named after the words typed before the places", () => {
+    const ranked = rankRemote(
+      "chatelet",
+      [stop("Châtelet", 48.858, 2.347)],
+      [place("Théâtre du Châtelet", "Paris")],
+      PARIS,
+    );
+    expect(ranked.map((h) => h.point.name)).toEqual(["Châtelet", "Théâtre du Châtelet"]);
+  });
+
+  test("keeps a stop matching most words only when it is nearby", () => {
+    const near = stop("Gare Montparnasse Vaugirard", 48.84, 2.32);
+    const far = stop("Gare Montparnasse Vaugirard bis", 45.7, 4.8);
+    expect(rankRemote("gare montparnasse sncf", [near, far], [], PARIS)).toEqual([near]);
+  });
+});
 
 const savedList: Saved[] = [
   {
