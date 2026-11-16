@@ -1056,6 +1056,22 @@ fieldset {
   background: var(--paper-3);
 }
 
+/* On a narrow phone, a row of four modes keeps the label of the chosen one only. */
+@media (max-width: 440px) {
+  .segmented:has(> button:nth-child(4) svg) button:not([aria-pressed="true"]) .seg-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .segmented:has(> button:nth-child(4) svg) button:not([aria-pressed="true"]) {
+    flex: 0 0 52px;
+  }
+}
+
 .dir-controls {
   display: flex;
   flex-wrap: wrap;

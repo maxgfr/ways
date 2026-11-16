@@ -17,11 +17,13 @@ import {
   engine,
   type ServiceId,
   setTravel,
+  TRAVEL_MODES,
   theme,
   travel,
 } from "../prefs";
 import { requestSnap } from "../Sheet";
 import { go } from "../state";
+import { MODE_ICON } from "./Directions";
 import { Regions } from "./Regions";
 
 function EndpointField({ id, label }: { id: ServiceId; label: string }) {
@@ -132,11 +134,11 @@ export function Settings() {
         <Segmented
           label={t("pref.mode")}
           value={p.mode}
-          options={[
-            { id: "transit", label: t("mode.transit"), icon: "bus" },
-            { id: "bike", label: t("mode.bike"), icon: "bike" },
-            { id: "walk", label: t("mode.walk"), icon: "foot" },
-          ]}
+          options={TRAVEL_MODES.map((id) => ({
+            id,
+            label: t(`mode.${id}`),
+            icon: MODE_ICON[id],
+          }))}
           onChange={(mode) => setTravel({ mode })}
         />
         <div class="toggles">

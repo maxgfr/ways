@@ -23,7 +23,22 @@ describe("parsePrefs", () => {
     const p = parsePrefs({
       travel: { mode: "bike", avoidHills: true, pace: "sprint", stepFree: 1 },
     });
-    expect(p.travel).toEqual({ mode: "bike", avoidHills: true, pace: "normal", stepFree: false });
+    expect(p.travel).toEqual({
+      mode: "bike",
+      avoidHills: true,
+      pace: "normal",
+      stepFree: false,
+      avoidTolls: false,
+      avoidMotorways: false,
+    });
+  });
+
+  test("remembers car trips and their roads to avoid", () => {
+    const p = parsePrefs({ travel: { mode: "car", avoidTolls: true, avoidMotorways: "yes" } });
+    expect(p.travel.mode).toBe("car");
+    expect(p.travel.avoidTolls).toBe(true);
+    expect(p.travel.avoidMotorways).toBe(false);
+    expect(parsePrefs({ travel: { mode: "plane" } }).travel.mode).toBe("transit");
   });
 
   test("keeps what is valid and drops what is not", () => {

@@ -202,7 +202,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.id)}
         >
           {o.icon && <Icon name={o.icon} size={18} />}
-          {o.label}
+          <span class="seg-label">{o.label}</span>
         </button>
       ))}
     </fieldset>

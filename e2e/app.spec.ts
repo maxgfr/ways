@@ -155,6 +155,26 @@ test("directions by bike come from Valhalla, and the mode is remembered", async 
   );
 });
 
+test("directions by car are driven by Valhalla, and can keep off tolls", async ({ page }) => {
+  const fakes = await fakeServices(page);
+  await page.goto(`./#/dir/${GARE}/${KENNEDY}/transit`);
+  await expect(page.locator(".itinerary").first()).toBeVisible();
+
+  await page.getByRole("button", { name: "Car", exact: true }).click();
+  await expect(page).toHaveURL(/\/car$/);
+  const rows = page.locator(".itinerary");
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first()).toContainText("4.4 km");
+  expect(fakes.valhalla.at(-1)?.costing).toBe("auto");
+
+  await page.getByText("Options").click();
+  await page.getByText("Avoid tolls").click();
+  await expect.poll(() => fakes.valhalla.at(-1)?.costing_options?.auto?.use_tolls).toBe(0);
+
+  await rows.first().click();
+  await expect(page.locator(".leg-title").first()).toHaveText("Drive");
+});
+
 test("choosing both ends with the search asks for one trip, not one per keystroke", async ({
   page,
 }) => {

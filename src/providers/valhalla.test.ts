@@ -59,6 +59,13 @@ describe("toItinerary", () => {
     expect(it?.id).toBe("valhalla1.openstreetmap.de:walk:1");
   });
 
+  test("by car, one drive leg", () => {
+    const it = toItinerary(fakeValhalla.trip, { ...req, mode: "car" }, origin, 0, NOW);
+    expect(it?.legs[0]?.kind).toBe("car");
+    expect(it?.legs[0]?.vehicle).toBe("car");
+    expect(it?.id).toBe("valhalla1.openstreetmap.de:car:0");
+  });
+
   test("an answer without a route is nothing", () => {
     expect(toItinerary({}, req, origin, 0, NOW)).toBeNull();
     expect(toItinerary({ summary: { time: 10 }, legs: [] }, req, origin, 0, NOW)).toBeNull();
@@ -69,6 +76,15 @@ describe("costingOptions", () => {
   test("by bike, avoiding hills lowers the appetite for them", () => {
     expect(costingOptions(req)).toEqual({ use_hills: 0.5 });
     expect(costingOptions({ ...req, avoidHills: true })).toEqual({ use_hills: 0.1 });
+  });
+
+  test("by car, tolls and motorways can be avoided", () => {
+    const car: PlanRequest = { ...req, mode: "car" };
+    expect(costingOptions(car)).toEqual({});
+    expect(costingOptions({ ...car, avoidTolls: true, avoidMotorways: true })).toEqual({
+      use_tolls: 0,
+      use_highways: 0,
+    });
   });
 
   test("on foot, pace and step-free", () => {

@@ -40,6 +40,8 @@ export function requestKey(req: PlanRequest, eng: string, w: When): string {
     req.avoidHills ? "flat" : "",
     req.pace ?? "",
     req.stepFree ? "stepfree" : "",
+    req.avoidTolls ? "notolls" : "",
+    req.avoidMotorways ? "nomotorways" : "",
   ].join("|");
 }
 
@@ -80,6 +82,8 @@ function refresh(): void {
     avoidHills: prefs.avoidHills,
     pace: prefs.pace,
     stepFree: prefs.stepFree,
+    avoidTolls: prefs.avoidTolls,
+    avoidMotorways: prefs.avoidMotorways,
   };
   const eng = engine.value;
   const key = requestKey(req, eng, w);
@@ -105,7 +109,10 @@ function refresh(): void {
     })
     .catch((err) => {
       if (isAbort(err) || controller.signal.aborted) return;
-      trips.value = { status: "done", outcome: { itineraries: [], failed: [], noRegion: false } };
+      trips.value = {
+        status: "done",
+        outcome: { itineraries: [], failed: [], noRegion: false, noDeviceMode: false },
+      };
     })
     .finally(() => {
       if (running === controller) running = null;

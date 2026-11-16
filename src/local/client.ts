@@ -4,6 +4,7 @@
  * the same shapes the online services give.
  */
 import { lang } from "../i18n";
+import { DEVICE_MODES } from "../providers/router";
 import type { Itinerary, PlanRequest, Router } from "../providers/types";
 import { packsBase, type RegionInfo, regionFor } from "./packs";
 import { DEVICE } from "./plan";
@@ -60,7 +61,7 @@ function ask(question: Question, signal?: AbortSignal): Promise<Answer> {
 export function deviceRouter(region: RegionInfo): Router {
   return {
     origin: DEVICE,
-    modes: ["transit", "bike", "walk"],
+    modes: [...DEVICE_MODES],
     async plan(req: PlanRequest): Promise<Itinerary[]> {
       // An AbortSignal cannot cross to a worker: it stays on this side.
       const { signal, ...plain } = req;
