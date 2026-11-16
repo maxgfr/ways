@@ -29,6 +29,7 @@ import type {
   RentalVehicle,
   Router,
   Step,
+  StepTurn,
   Stop,
   TravelMode,
   Vehicle,
@@ -186,21 +187,37 @@ function toLine(r: Raw): Line {
   return line;
 }
 
-const STEP_KEYS: Record<string, MessageKey> = {
-  DEPART: "step.depart",
-  CONTINUE: "step.continue",
-  LEFT: "step.left",
-  RIGHT: "step.right",
-  SLIGHTLY_LEFT: "step.slightLeft",
-  SLIGHTLY_RIGHT: "step.slightRight",
-  HARD_LEFT: "step.hardLeft",
-  HARD_RIGHT: "step.hardRight",
-  UTURN_LEFT: "step.uturn",
-  UTURN_RIGHT: "step.uturn",
-  CIRCLE_CLOCKWISE: "step.roundabout",
-  CIRCLE_COUNTERCLOCKWISE: "step.roundabout",
-  STAIRS: "step.stairs",
-  ELEVATOR: "step.elevator",
+const STEP_TURNS: Record<string, StepTurn> = {
+  DEPART: "depart",
+  CONTINUE: "continue",
+  LEFT: "left",
+  RIGHT: "right",
+  SLIGHTLY_LEFT: "slightLeft",
+  SLIGHTLY_RIGHT: "slightRight",
+  HARD_LEFT: "hardLeft",
+  HARD_RIGHT: "hardRight",
+  UTURN_LEFT: "uturn",
+  UTURN_RIGHT: "uturn",
+  CIRCLE_CLOCKWISE: "roundabout",
+  CIRCLE_COUNTERCLOCKWISE: "roundabout",
+  STAIRS: "stairs",
+  ELEVATOR: "elevator",
+};
+
+const STEP_KEYS: Record<StepTurn, MessageKey> = {
+  depart: "step.depart",
+  continue: "step.continue",
+  left: "step.left",
+  right: "step.right",
+  slightLeft: "step.slightLeft",
+  slightRight: "step.slightRight",
+  hardLeft: "step.hardLeft",
+  hardRight: "step.hardRight",
+  uturn: "step.uturn",
+  roundabout: "step.roundabout",
+  arrive: "step.continue",
+  stairs: "step.stairs",
+  elevator: "step.elevator",
 };
 
 /** Street steps as sentences, merging the stretches that go straight on along the same street. */
@@ -215,8 +232,9 @@ function toSteps(raw: unknown): Step[] {
       prev.distance += distance;
       continue;
     }
-    const action = t(STEP_KEYS[dir] ?? "step.continue");
-    out.push({ text: street ? t("step.onto", { action, street }) : action, distance });
+    const turn = STEP_TURNS[dir] ?? "continue";
+    const action = t(STEP_KEYS[turn]);
+    out.push({ text: street ? t("step.onto", { action, street }) : action, distance, turn });
   }
   return out;
 }

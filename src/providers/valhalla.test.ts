@@ -38,8 +38,8 @@ describe("toItinerary", () => {
       [-1.711, 48.1214],
     ]);
     expect(leg?.steps).toEqual([
-      { text: "Bike north on Rue de l'Alma.", distance: 300 },
-      { text: "Turn left onto Boulevard de la Liberté.", distance: 4110 },
+      { text: "Bike north on Rue de l'Alma.", distance: 300, turn: "depart" },
+      { text: "Turn left onto Boulevard de la Liberté.", distance: 4110, turn: "left" },
     ]);
     expect(leg?.ascent).toBe(11);
     expect(leg?.elevation).toHaveLength(7);

@@ -6,7 +6,7 @@
  */
 import { signal } from "@preact/signals";
 import { type CategoryId, categoryById } from "../map/places";
-import type { Point } from "../providers/types";
+import type { Itinerary, Point } from "../providers/types";
 import { TRAVEL_MODES, type TravelMode } from "./prefs";
 
 export type Route =
@@ -26,7 +26,12 @@ export type Route =
   | { name: "saved" }
   | { name: "layers" }
   | { name: "settings" }
-  | { name: "sources" };
+  | { name: "sources" }
+  /** Guidance along the trip in `guided`; without one, there is nothing to show. */
+  | { name: "go" };
+
+/** The trip being followed, its mode and where it goes; set while guiding. */
+export const guided = signal<{ it: Itinerary; mode: TravelMode; to: Point } | null>(null);
 
 export function encodePoint(p: Point): string {
   const parts = [p.lat.toFixed(5), p.lng.toFixed(5), encodeURIComponent(p.name)];
@@ -86,6 +91,7 @@ export function parseRoute(hash: string): Route {
     case "layers":
     case "settings":
     case "sources":
+    case "go":
       return { name: head };
     default:
       return { name: "home" };

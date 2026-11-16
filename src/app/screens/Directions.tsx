@@ -10,6 +10,7 @@ import type { Itinerary, Leg, Point } from "../../providers/types";
 import { Icon, type IconName, vehicleIcon } from "../../ui/icons";
 import { LineBadge, ScreenHead, Segmented, Toggle } from "../../ui/ui";
 import { locate } from "../actions";
+import { startGuidance } from "../guidance";
 import { fullLabel } from "../nav";
 import { type Extra, PointPicker } from "../PointPicker";
 import { setTravel, TRAVEL_MODES, type TravelMode, travel } from "../prefs";
@@ -389,6 +390,18 @@ function Detail({ it, r }: { it: Itinerary; r: DirRoute }) {
         {formatTime(it.start, it.legs[0]?.from.tz)} – {formatTime(it.end, last?.to.tz)}
         {it.legs.some((l) => l.kind === "transit") && ` · ${transfersText(it.transfers)}`}
       </p>
+      <button
+        type="button"
+        class="btn primary block"
+        onClick={() => {
+          const to =
+            r.to ?? (last ? { lat: last.to.lat, lng: last.to.lng, name: last.to.name } : null);
+          if (to) startGuidance(it, r.mode, to);
+        }}
+      >
+        <Icon name="start" size={18} />
+        {t("guide.start")}
+      </button>
       <ol class="legs">
         {it.legs.map((leg, i) => (
           <LegBlock key={`${leg.start}${i}`} leg={leg} />

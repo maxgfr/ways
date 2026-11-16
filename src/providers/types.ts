@@ -66,12 +66,30 @@ export interface Call {
   cancelled?: boolean;
 }
 
+/** The move a street instruction asks for, drawn as an arrow while guiding. */
+export type StepTurn =
+  | "depart"
+  | "continue"
+  | "left"
+  | "right"
+  | "slightLeft"
+  | "slightRight"
+  | "hardLeft"
+  | "hardRight"
+  | "uturn"
+  | "roundabout"
+  | "arrive"
+  | "stairs"
+  | "elevator";
+
 /** One instruction along a street leg. */
 export interface Step {
   /** A sentence in the user's language ("Turn left onto Rue de l'Horloge"). */
   text: string;
   /** Metres covered by this step. */
   distance: number;
+  /** The move it asks for, when the source says. */
+  turn?: StepTurn;
 }
 
 export interface Leg {

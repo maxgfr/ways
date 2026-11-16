@@ -9,7 +9,7 @@ import { type PlanOutcome, planTrip } from "../providers/router";
 import type { Itinerary, PlanRequest, Point } from "../providers/types";
 import { isAbort } from "../providers/types";
 import { engine, travel } from "./prefs";
-import { route, userPosition, type When, when } from "./state";
+import { guided, route, userPosition, type When, when } from "./state";
 
 export type Trips =
   | { status: "idle" }
@@ -141,9 +141,11 @@ if (typeof window !== "undefined") {
   });
 }
 
-/** The itinerary drawn on the map: the one opened in detail, or the first of the list. */
+/** The itinerary drawn on the map: the one followed, the one opened in detail, or the first of the list. */
 export const shownItinerary = computed<Itinerary | null>(() => {
   const r = route.value;
+  const followed = guided.value;
+  if (r.name === "go") return followed?.it ?? null;
   const s = trips.value;
   if (r.name !== "dir" || s.status !== "done") return null;
   return s.outcome.itineraries[r.pick ?? 0] ?? null;

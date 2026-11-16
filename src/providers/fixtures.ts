@@ -326,8 +326,8 @@ export const fakeValhalla = {
         // (48.1032,-1.6727) → (48.1214,-1.711), precision 6
         shape: "_q~vzAv~aeBopb@vxiA",
         maneuvers: [
-          { instruction: "Bike north on Rue de l'Alma.", length: 0.3 },
-          { instruction: "Turn left onto Boulevard de la Liberté.", length: 4.11 },
+          { instruction: "Bike north on Rue de l'Alma.", length: 0.3, type: 2 },
+          { instruction: "Turn left onto Boulevard de la Liberté.", length: 4.11, type: 15 },
           { instruction: "", length: 0 },
         ],
         elevation: [30, 31, 36, 35.6, 41, 38, 30],
