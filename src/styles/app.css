@@ -1536,6 +1536,174 @@ fieldset {
   }
 }
 
+/* Guidance: what to do next on top, what is left at the bottom, the map in between. */
+.guide {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 10px) 10px calc(var(--safe-bottom) + 10px);
+  pointer-events: none;
+}
+
+.guide > * {
+  pointer-events: auto;
+}
+
+.guide-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 560px;
+}
+
+.guide-next {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 88px;
+  padding: 14px 18px;
+  border-radius: var(--r-l);
+  background: var(--action);
+  color: var(--on-action);
+  box-shadow: var(--shadow-2);
+}
+
+.guide-next.arrived {
+  background: var(--ok);
+}
+
+.guide-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+}
+
+.guide-words {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.guide-dist {
+  font: 600 34px / 1 var(--label);
+  letter-spacing: 0.01em;
+}
+
+.guide-text {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.guide-sub {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.guide-next .line-badge {
+  margin: 2px 0;
+  border-color: var(--on-action);
+}
+
+.guide-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 8px 12px;
+  border-radius: var(--r-m);
+  background: var(--warn-soft);
+  color: var(--ink);
+  font-size: 15px;
+  box-shadow: var(--shadow-1);
+}
+
+.guide-recentre {
+  align-self: center;
+  margin-top: auto;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-2);
+  background: var(--paper);
+}
+
+.guide-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 560px;
+  width: 100%;
+  padding: 12px 12px 12px 18px;
+  border-radius: var(--r-l);
+  background: var(--paper);
+  box-shadow: var(--shadow-2);
+}
+
+.guide-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.guide-time {
+  font: 600 28px / 1.05 var(--label);
+  color: var(--ok);
+}
+
+.guide-meta {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.guide-bar .round-btn {
+  box-shadow: none;
+  background: var(--paper-2);
+}
+
+.guide-exit {
+  min-width: 88px;
+  border-color: transparent;
+  background: var(--danger);
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .guide-exit {
+  color: #2a0905;
+}
+
+/*
+ * While guiding, the position is an arrow pointing the way the map is turned. It is drawn
+ * by a pseudo-element: the marker's own transform places it on the map.
+ */
+.app[data-route="go"] .me-dot {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.app[data-route="go"] .me-dot::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 3px solid #ffffff;
+  border-radius: 50% 0 50% 50%;
+  background: #1a66d9;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  transform: rotate(-45deg);
+}
+
 /* On the map. */
 .me-dot {
   width: 18px;

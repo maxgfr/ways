@@ -80,6 +80,7 @@ export function toSteps(manoeuvres: Manoeuvre[]): Step[] {
     return {
       text: m.street ? t("step.onto", { action, street: m.street }) : action,
       distance: Math.round(m.distance),
+      turn: m.turn,
     };
   });
 }

@@ -86,8 +86,8 @@ describe("toItinerary", () => {
       [-1.6723, 48.1035],
     ]);
     expect(walk?.steps).toEqual([
-      { text: "Start onto Place de la Gare", distance: 120 },
-      { text: "Turn left", distance: 90 },
+      { text: "Start onto Place de la Gare", distance: 120, turn: "depart" },
+      { text: "Turn left", distance: 90, turn: "left" },
     ]);
   });
 

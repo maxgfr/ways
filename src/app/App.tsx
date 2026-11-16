@@ -18,6 +18,7 @@ import { layers } from "./prefs";
 import { currentSnap, Sheet } from "./Sheet";
 import { Category } from "./screens/Category";
 import { Directions } from "./screens/Directions";
+import { GuidanceScreen } from "./screens/Guidance";
 import { Home } from "./screens/Home";
 import { Layers, layerNote } from "./screens/Layers";
 import { Place } from "./screens/Place";
@@ -25,7 +26,7 @@ import { Saved } from "./screens/Saved";
 import { Settings } from "./screens/Settings";
 import { Sources } from "./screens/Sources";
 import { Stop } from "./screens/Stop";
-import { back, go, locating, route, userPosition } from "./state";
+import { back, go, guided, locating, route, userPosition } from "./state";
 
 function Screen() {
   const r = route.value;
@@ -94,6 +95,18 @@ function Chips() {
 
 export function App() {
   const r = route.value;
+  // Guidance takes the whole screen but the map; opened without a trip (a reload), there is none.
+  const guiding = r.name === "go" && guided.value !== null;
+  if (r.name === "go" && !guiding) queueMicrotask(() => go({ name: "home" }, { replace: true }));
+  if (guiding) {
+    return (
+      <div class="app" data-route="go">
+        <MapView />
+        <GuidanceScreen />
+        <Toasts />
+      </div>
+    );
+  }
   const wide = sheetInset.value.left > 0;
   // On a wide screen the buttons sit above the zoom buttons and the attribution.
   const floatBottom = wide ? 104 : sheetInset.value.bottom + 14;

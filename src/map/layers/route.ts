@@ -8,6 +8,7 @@ import type { Feature, LineString, Point } from "geojson";
 import type { Map as MLMap } from "maplibre-gl";
 import * as maplibregl from "maplibre-gl";
 import { dark } from "../../app/prefs";
+import { route } from "../../app/state";
 import { shownItinerary, shownTrip } from "../../app/trips";
 import { boundsOf } from "../../geo/polyline";
 import type { Leg } from "../../providers/types";
@@ -141,8 +142,9 @@ export function attachRoute(
     }
     // Frame a trip once when it appears, not each time its times refresh. A line opened from a
     // stop is drawn without moving the map: the user is looking at that stop.
+    // While guiding, the camera follows the traveller instead.
     const key = itinerary ? itinerary.id : "";
-    if (key && key !== framed) {
+    if (key && key !== framed && route.peek().name !== "go") {
       const box = boundsOf(lines.map((l) => l.geometry.coordinates as [number, number][]));
       if (box) fit(box);
     }

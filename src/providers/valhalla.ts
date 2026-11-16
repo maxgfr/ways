@@ -16,6 +16,7 @@ import type {
   PlanRequest,
   Router,
   Step,
+  StepTurn,
   TravelMode,
   Vehicle,
 } from "./types";
@@ -26,7 +27,42 @@ const CLIENT_ID = "ways (https://github.com/maxgfr/ways)";
 interface Maneuver {
   instruction?: string;
   length?: number;
+  /** Valhalla's maneuver type number. */
+  type?: number;
 }
+
+/** Valhalla's maneuver types, as the move they ask for. Ramps, exits and merges are drawn as the side they keep to. */
+export const TURNS: Partial<Record<number, StepTurn>> = {
+  1: "depart",
+  2: "depart",
+  3: "depart",
+  4: "arrive",
+  5: "arrive",
+  6: "arrive",
+  7: "continue",
+  8: "continue",
+  9: "slightRight",
+  10: "right",
+  11: "hardRight",
+  12: "uturn",
+  13: "uturn",
+  14: "hardLeft",
+  15: "left",
+  16: "slightLeft",
+  17: "continue",
+  18: "slightRight",
+  19: "slightLeft",
+  20: "slightRight",
+  21: "slightLeft",
+  22: "continue",
+  23: "slightRight",
+  24: "slightLeft",
+  25: "continue",
+  26: "roundabout",
+  27: "roundabout",
+  37: "slightRight",
+  38: "slightLeft",
+};
 
 interface Trip {
   summary?: { time?: number; length?: number };
@@ -82,10 +118,14 @@ export function toItinerary(
   const steps: Step[] = legs.flatMap((l) =>
     (l.maneuvers ?? [])
       .filter((m) => typeof m.instruction === "string" && m.instruction.length > 0)
-      .map((m) => ({
-        text: m.instruction as string,
-        distance: Math.round((m.length ?? 0) * 1000),
-      })),
+      .map((m) => {
+        const turn = m.type !== undefined ? TURNS[m.type] : undefined;
+        return {
+          text: m.instruction as string,
+          distance: Math.round((m.length ?? 0) * 1000),
+          ...(turn ? { turn } : {}),
+        };
+      }),
   );
   const elevation = legs.flatMap((l) => l.elevation ?? []);
   const seconds = Math.round(duration);
