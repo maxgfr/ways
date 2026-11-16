@@ -9,7 +9,8 @@ import { formatDistance, t } from "../i18n";
 import { mapCenter, mapZoom } from "../map/MapView";
 import { Icon, type IconName, vehicleIcon } from "../ui/icons";
 import { engine } from "./prefs";
-import { type Hit, MIN_CHARS, useSearch } from "./search";
+import { type Hit, MIN_CHARS, searchOrigin, useSearch } from "./search";
+import { userPosition } from "./state";
 
 export interface Extra {
   key: string;
@@ -57,7 +58,8 @@ export function PointPicker({
   const [pendingEnter, setPendingEnter] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
-  const { hits, local, status, failed } = useSearch(open ? q : "", mapCenter.value, mapZoom.value);
+  const here = searchOrigin(mapCenter.value, mapZoom.value, userPosition.value);
+  const { hits, local, status, failed } = useSearch(open ? q : "", here, mapZoom.value);
 
   useEffect(() => {
     if (focusKey) input.current?.focus();
@@ -130,7 +132,6 @@ export function PointPicker({
   }, [pendingEnter, hits, status]);
 
   const typed = q.trim().length;
-  const here = mapCenter.value;
   const listId = `${id}-results`;
   const showList = open && (count > 0 || typed > 0);
   let lastSource = "";

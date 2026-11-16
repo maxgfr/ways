@@ -102,7 +102,10 @@ test("recents can be removed one by one, cleared, or not kept at all", async ({ 
   await expect(page.getByRole("heading", { name: "République" })).toBeVisible();
 
   await page.goBack();
-  const recent = page.locator("section", { has: page.getByRole("heading", { name: "Recent" }) });
+  // The section whose own head says Recent, not the panel around every section.
+  const recent = page.locator("section:has(> .section-head)", {
+    has: page.getByRole("heading", { name: "Recent" }),
+  });
   await expect(recent.getByRole("button", { name: /^République/ })).toBeVisible();
   await recent.getByRole("button", { name: /^Remove République.* from recents$/ }).click();
   await expect(recent).toHaveCount(0);
@@ -367,6 +370,25 @@ test("no request leaves for a routing service before the user asks for a trip", 
   await page.getByPlaceholder("Search a place or a stop").fill("gare");
   await expect(page.getByRole("button", { name: /Gare de Rennes/ })).toBeVisible();
   expect(fakes.calls.filter((c) => c.endsWith("/plan") || c.startsWith("valhalla"))).toEqual([]);
+});
+
+test("suggestions are looked for around the user, at the scale of a district", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["geolocation"]);
+  await context.setGeolocation({ latitude: 48.1035, longitude: -1.6723 });
+  await fakeServices(page);
+  await page.goto("./");
+  const me = page.getByRole("button", { name: "Show my position" });
+  await me.click();
+  await expect(me).toHaveAttribute("aria-pressed", "true");
+  const asked = page.waitForRequest((r) => r.url().startsWith("https://photon.komoot.io/api/"));
+  await page.getByPlaceholder("Search a place or a stop").fill("rivoli 10");
+  const url = new URL((await asked).url());
+  expect(url.searchParams.get("lat")).toBe("48.10350");
+  expect(url.searchParams.get("lon")).toBe("-1.67230");
+  expect(Number(url.searchParams.get("zoom"))).toBeGreaterThanOrEqual(14);
 });
 
 test("the locate button asks for the position, shows it and says when it is refused", async ({

@@ -1,6 +1,15 @@
 import { describe, expect, test } from "bun:test";
+import { biasZoom } from "../geo/geocode";
 import type { Recent, Saved } from "../store/store";
-import { fold, type Hit, labelParts, localHits, matchShare, rankRemote } from "./search";
+import {
+  fold,
+  type Hit,
+  labelParts,
+  localHits,
+  matchShare,
+  rankRemote,
+  searchOrigin,
+} from "./search";
 
 const PARIS: [number, number] = [2.3522, 48.8566];
 
@@ -128,5 +137,35 @@ describe("localHits", () => {
 
   test("capped", () => {
     expect(localHits("", savedList, recentList, 2)).toHaveLength(2);
+  });
+});
+
+describe("searchOrigin", () => {
+  const paris: [number, number] = [2.3522, 48.8566];
+  const lyon: [number, number] = [4.8357, 45.764];
+
+  test("around the user when the map shows where they are", () => {
+    expect(searchOrigin([2.3, 48.85], 13, paris)).toEqual(paris);
+  });
+
+  test("around the map when it shows another city", () => {
+    expect(searchOrigin(lyon, 13, paris)).toEqual(lyon);
+  });
+
+  test("around the user when the map shows a whole country", () => {
+    expect(searchOrigin(lyon, 6, paris)).toEqual(paris);
+  });
+
+  test("around the map when the position is not known", () => {
+    expect(searchOrigin(lyon, 13, null)).toEqual(lyon);
+  });
+});
+
+describe("biasZoom", () => {
+  test("never looser than a district, never tighter than a street", () => {
+    expect(biasZoom(4)).toBe(14);
+    expect(biasZoom(12)).toBe(14);
+    expect(biasZoom(15.4)).toBe(15);
+    expect(biasZoom(19)).toBe(16);
   });
 });

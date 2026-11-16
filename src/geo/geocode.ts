@@ -83,6 +83,15 @@ export function fromPhoton(f: PhotonFeature): GeoResult | null {
 }
 
 /** Places matching `q`, nearest to `near` first when given. */
+/**
+ * How tightly Photon keeps to `near`, as a map zoom. At a city's scale or wider, Photon lets
+ * well-known places far away outrank the street round the corner ("rue de la paix" asked in
+ * Paris listed the suburbs and not Paris), so the bias is never looser than a district.
+ */
+export function biasZoom(zoom: number): number {
+  return Math.round(Math.min(16, Math.max(14, zoom)));
+}
+
 export async function search(
   q: string,
   opts: { near?: [number, number]; zoom?: number; signal?: AbortSignal; limit?: number } = {},
@@ -95,7 +104,7 @@ export async function search(
   if (opts.near) {
     url.searchParams.set("lon", opts.near[0].toFixed(5));
     url.searchParams.set("lat", opts.near[1].toFixed(5));
-    url.searchParams.set("zoom", String(Math.round(Math.min(18, Math.max(4, opts.zoom ?? 12)))));
+    url.searchParams.set("zoom", String(biasZoom(opts.zoom ?? 14)));
   }
   const res = await fetch(url, opts.signal ? { signal: opts.signal } : {});
   if (!res.ok) throw new Error(`Photon ${res.status}`);
