@@ -7,8 +7,9 @@ import { distance } from "../../geo/polyline";
 import { formatDistance, t } from "../../i18n";
 import { stopsInView, stopsStatus } from "../../map/layers/stops";
 import { mapCenter, showPoint } from "../../map/MapView";
-import { recents, saved, storageError } from "../../store/store";
+import { forgetRecent, forgetRecents, recents, saved, storageError } from "../../store/store";
 import { Icon, type IconName, vehicleIcon } from "../../ui/icons";
+import { IconButton, toast } from "../../ui/ui";
 import { locate } from "../actions";
 import { directionsTo, openPlace } from "../nav";
 import { requestSnap } from "../Sheet";
@@ -128,14 +129,31 @@ export function Home() {
 
       {recents.value.length > 0 && (
         <section>
-          <h3 class="section-title">{t("home.recent")}</h3>
+          <div class="section-head">
+            <h3 class="section-title">{t("home.recent")}</h3>
+            <button
+              type="button"
+              class="link-btn"
+              onClick={() => {
+                forgetRecents();
+                toast(t("settings.data.cleared"));
+              }}
+            >
+              {t("home.recent.clear")}
+            </button>
+          </div>
           <ul class="rows">
             {recents.value.slice(0, 5).map((r) => (
-              <li key={`${r.point.lat},${r.point.lng},${r.at}`}>
+              <li key={`${r.point.lat},${r.point.lng},${r.at}`} class="row-with-action">
                 <PlaceRow
                   icon="recent"
                   label={r.point.name}
                   onClick={() => openPlace(r.kind, r.point, r.osm)}
+                />
+                <IconButton
+                  icon="close"
+                  label={t("home.recent.remove", { name: r.point.name })}
+                  onClick={() => forgetRecent(r.point)}
                 />
               </li>
             ))}

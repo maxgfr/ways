@@ -15,6 +15,7 @@ import {
   DEFAULT_ENDPOINTS,
   endpoints,
   engine,
+  keepRecents,
   type ServiceId,
   setTravel,
   TRAVEL_MODES,
@@ -205,6 +206,16 @@ export function Settings() {
       <section class="stack tight">
         <h3 class="section-title">{t("settings.data")}</h3>
         <p class="muted small">{t("settings.data.hint")}</p>
+        <Toggle
+          label={t("pref.keepRecents")}
+          hint={t("pref.keepRecents.hint")}
+          checked={keepRecents.value}
+          onChange={(on) => {
+            keepRecents.value = on;
+            // Not keeping recents any more forgets the ones kept.
+            if (!on) forgetRecents();
+          }}
+        />
         <button
           type="button"
           class="btn"

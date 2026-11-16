@@ -75,6 +75,8 @@ interface Prefs {
   travel: Travel;
   /** Download the region around what the user looks at, and keep it up to date. */
   autoRegions: boolean;
+  /** List the places and stops the user opens, on the home screen and first in the search. */
+  keepRecents: boolean;
 }
 
 const PREFS_KEY = "ways:prefs";
@@ -140,6 +142,7 @@ export function parsePrefs(raw: unknown): Prefs {
       avoidMotorways: bool(tr.avoidMotorways, DEFAULT_TRAVEL.avoidMotorways),
     },
     autoRegions: bool(r.autoRegions, true),
+    keepRecents: bool(r.keepRecents, true),
   };
 }
 
@@ -158,6 +161,7 @@ export const lastView = signal<View | null>(initial.view);
 export const layers = signal<Layers>(initial.layers);
 export const engine = signal<Engine>(initial.engine);
 export const autoRegions = signal<boolean>(initial.autoRegions);
+export const keepRecents = signal<boolean>(initial.keepRecents);
 /** Custom service addresses; an empty string means the default one. */
 export const endpoints = signal<Record<ServiceId, string>>(initial.endpoints);
 
@@ -220,6 +224,7 @@ if (typeof window !== "undefined") {
       endpoints: endpoints.value,
       travel: travel.value,
       autoRegions: autoRegions.value,
+      keepRecents: keepRecents.value,
     };
     try {
       localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));

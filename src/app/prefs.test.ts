@@ -11,7 +11,13 @@ describe("parsePrefs", () => {
       endpoints: { motis: "", valhalla: "" },
       travel: DEFAULT_TRAVEL,
       autoRegions: true,
+      keepRecents: true,
     });
+  });
+
+  test("recents can be turned off", () => {
+    expect(parsePrefs({ keepRecents: false }).keepRecents).toBe(false);
+    expect(parsePrefs({ keepRecents: 0 }).keepRecents).toBe(true);
   });
 
   test("automatic regions can be turned off", () => {

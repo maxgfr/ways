@@ -5,6 +5,7 @@
  * document stays in memory for the session and the interface says so.
  */
 import { computed, effect, signal } from "@preact/signals";
+import { keepRecents } from "../app/prefs";
 import type { Point } from "../providers/types";
 
 export interface Saved {
@@ -193,8 +194,15 @@ export function unsave(point: Point): void {
 }
 
 export function remember(kind: "place" | "stop", point: Point, osm?: string): void {
-  if (!point.name) return;
+  if (!point.name || !keepRecents.peek()) return;
   doc.value = withRecent(doc.value, { kind, point, ...(osm ? { osm } : {}), at: Date.now() });
+}
+
+export function forgetRecent(point: Point): void {
+  doc.value = {
+    ...doc.value,
+    recents: doc.value.recents.filter((r) => !samePlace(r.point, point)),
+  };
 }
 
 export function forgetRecents(): void {
