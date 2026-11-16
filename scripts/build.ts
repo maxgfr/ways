@@ -177,6 +177,14 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   if (url.origin !== location.origin) return;
+  // The page itself comes from the network when there is one, so a new version shows at once;
+  // the copy kept here opens the app offline. Its scripts and styles are named by their content.
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request).catch(async () => (await caches.match("./", { cacheName: CACHE })) || Response.error()),
+    );
+    return;
+  }
   // Only ways' own cache: every page of maxgfr.github.io shares this origin's Cache Storage.
   e.respondWith(
     caches.match(e.request, { cacheName: CACHE, ignoreSearch: true }).then((hit) => hit || fetch(e.request)),
