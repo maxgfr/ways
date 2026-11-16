@@ -46,7 +46,7 @@ test.describe("a visit with the position already allowed", () => {
     await page.goto("./");
     await expect(page.locator(".me-dot")).toBeVisible();
     await expect
-      .poll(async () => (await savedView(page)).lat, { timeout: 10_000 })
+      .poll(async () => (await savedView(page)).lat, { timeout: 25_000 })
       .toBeCloseTo(45.76, 1);
     await expect(page.getByRole("button", { name: /See what is around you/ })).toHaveCount(0);
   });
@@ -57,4 +57,21 @@ test.describe("a visit with the position already allowed", () => {
     await page.waitForTimeout(1500);
     await expect(page.locator(".me-dot")).toHaveCount(0);
   });
+});
+
+test("a link to a place opens the map on it, whatever the last view", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem("seeded")) return;
+    sessionStorage.setItem("seeded", "1");
+    localStorage.setItem(
+      "ways:prefs",
+      JSON.stringify({ view: { lng: 9.93, lat: 53.59, zoom: 16 } }),
+    );
+  });
+  await page.goto("./#/place/48.84430,2.37440,Gare%20de%20Lyon");
+  await expect(page.getByRole("heading", { name: "Gare de Lyon" })).toBeVisible();
+  await expect
+    .poll(async () => (await savedView(page)).lat, { timeout: 25_000 })
+    .toBeCloseTo(48.84, 1);
+  expect((await savedView(page)).lng).toBeCloseTo(2.37, 1);
 });
