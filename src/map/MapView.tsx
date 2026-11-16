@@ -11,7 +11,7 @@ import * as maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "preact/hooks";
 import { locate, openPointAt } from "../app/actions";
 import { dark, lastView, layers } from "../app/prefs";
-import { deviceTimezone, positionAllowed, viewForTimezone } from "../app/startView";
+import { deviceTimezone, positionAllowed, startView } from "../app/startView";
 import { go, pin, route, userAccuracy, userPosition } from "../app/state";
 import { lang, t } from "../i18n";
 import { remember } from "../store/store";
@@ -96,7 +96,7 @@ export function MapView() {
     if (!container.current) return;
     maplibregl.setWorkerUrl(new URL("./maplibre-gl-worker.mjs", document.baseURI).href);
     // Where the user last looked, or else their city as their device's time zone tells it.
-    const view = lastView.value ?? viewForTimezone(deviceTimezone());
+    const view = startView(lastView.value, deviceTimezone());
     const base = mapStyle(dark.value);
     const map = new maplibregl.Map({
       container: container.current,

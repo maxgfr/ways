@@ -204,6 +204,7 @@
   "home.local": "What you save, your searches and your settings stay in this browser. ways has no account and no server.",
   "home.local.more": "What leaves this device",
   "search.local": "Local mode: what you saved and the stops of your regions are searched.",
+  "search.goOnline": "Search addresses too (Auto mode)",
   "stop.local": "Local mode: departures are not asked for. Switch the mode to Auto or Online in the settings to see them.",
   "dir.positionNote": "Your position is found by this device. It leaves it only as the start of a trip you ask an online service for.",
   "regions.title": "Offline data",

@@ -124,6 +124,14 @@ export function viewForTimezone(zone: string | undefined): StartView {
   return AREAS[zone.split("/")[0] ?? ""] ?? WORLD;
 }
 
+/** Below this zoom a saved view shows a continent or more: it says nothing of where the user is. */
+const MIN_KEPT_ZOOM = 5;
+
+/** Where the user last looked, unless it was that far out; then their city, from the time zone. */
+export function startView(last: StartView | null | undefined, zone: string | undefined): StartView {
+  return last && last.zoom >= MIN_KEPT_ZOOM ? last : viewForTimezone(zone);
+}
+
 export function deviceTimezone(): string | undefined {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;

@@ -1,5 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { viewForTimezone } from "./startView";
+import { startView, viewForTimezone } from "./startView";
+
+describe("startView", () => {
+  test("reopens where the user last looked", () => {
+    const last = { lng: 2.35, lat: 48.85, zoom: 14 };
+    expect(startView(last, "Europe/Berlin")).toEqual(last);
+  });
+
+  test("a last view of a continent or more gives way to the user's city", () => {
+    const world = { lng: 45.6, lat: 29, zoom: 2.4 };
+    expect(startView(world, "Europe/Paris")).toEqual(viewForTimezone("Europe/Paris"));
+    expect(startView(null, "Europe/Paris")).toEqual(viewForTimezone("Europe/Paris"));
+  });
+});
 
 describe("viewForTimezone", () => {
   test("a listed zone opens on its city", () => {
