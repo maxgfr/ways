@@ -74,7 +74,7 @@ describe("rankRemote", () => {
     expect(rankRemote("gare montparnasse sncf", [near, far], [], PARIS)).toEqual([near]);
   });
 
-  test("stops named after the words typed but far away come after the places, two at most", () => {
+  test("a stop and streets of the name typed are ranked together, nearest first; far stops last, two at most", () => {
     const ranked = rankRemote(
       "rue de la paix",
       [
@@ -90,12 +90,18 @@ describe("rankRemote", () => {
       PARIS,
     );
     expect(ranked.map((h) => h.meta || `${h.point.lat}`)).toEqual([
-      "48.75",
       "75002 Paris",
       "94250 Gentilly",
+      "48.75",
       "49.05",
       "45.79",
     ]);
+  });
+
+  test("a city comes before stops whose name only holds it", () => {
+    const city = { ...place("Lyon", "Auvergne-Rhône-Alpes, France", 45.76, 4.84), area: true };
+    const ranked = rankRemote("lyon", [stop("Gare de Lyon", 48.844, 2.374)], [city], PARIS);
+    expect(ranked.map((h) => h.point.name)).toEqual(["Lyon", "Gare de Lyon"]);
   });
 });
 

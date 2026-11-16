@@ -103,16 +103,24 @@ export function matchShare(q: string, name: string): number {
   return words.filter((w) => hay.some((h) => h.startsWith(w))).length / words.length;
 }
 
+/** A name as it is compared: folded, with punctuation and spacing evened out. */
+function nameKey(name: string): string {
+  return fold(name)
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
 /**
- * Places of the same name nearest first, each name where it first came: many
- * towns have a "Rue de la Paix", and the user means the one around them. A
- * town or city keeps its rank: "Lyon" is the city before a Lyon street nearby.
+ * Places and stops of the same name nearest first, each name where it first
+ * came: many towns have a "Rue de la Paix", a street or a stop, and the user
+ * means the one around them. A town or city keeps its rank: "Lyon" is the
+ * city before a Lyon street nearby.
  */
 export function nearestFirstByName(places: Hit[], near: [number, number] | undefined): Hit[] {
   if (!near) return places;
   const groups = new Map<string, Hit[]>();
   for (const p of places) {
-    const name = fold(p.point.name);
+    const name = nameKey(p.point.name);
     const group = groups.get(name);
     if (group) group.push(p);
     else groups.set(name, [p]);
@@ -127,11 +135,12 @@ export function nearestFirstByName(places: Hit[], near: [number, number] | undef
 
 /**
  * Places and stops in one list, the way a map search reads: a nearby stop
- * named after what was typed comes first; then the places, addresses
- * included, the nearest of a name first; then the stops that match most of
- * the words and are nearby, and last a few stops of that name far away. Stop
- * search is fuzzy and covers the world: without this, a street address drowned
- * under bus stops of similar names hundreds of kilometres away.
+ * named exactly what was typed comes first, ranked with the places of its
+ * name; then the places, addresses included, the nearest of a name first;
+ * then the nearby stops whose name holds every word, then those that match
+ * most of them, and last a few stops of that name far away. Stop search is
+ * fuzzy and covers the world: without this, a street address drowned under
+ * bus stops of similar names hundreds of kilometres away.
  */
 export function rankRemote(
   q: string,
@@ -163,9 +172,13 @@ export function rankRemote(
             distance(near, [a.point.lng, a.point.lat]) - distance(near, [b.point.lng, b.point.lat]),
         )
       : list;
+  // A stop named exactly what was typed leads, and joins the places of its name: the
+  // nearest "Rue de la Paix", stop or street, comes first.
+  const typed = nameKey(q);
+  const exact = strong.filter((s) => nameKey(s.point.name) === typed);
+  const containing = strong.filter((s) => nameKey(s.point.name) !== typed);
   return [
-    ...byDistance(strong),
-    ...nearestFirstByName(uniquePlaces, near),
+    ...nearestFirstByName([...byDistance(exact), ...uniquePlaces, ...byDistance(containing)], near),
     ...weak.slice(0, 3),
     ...byDistance(far).slice(0, 2),
   ];
