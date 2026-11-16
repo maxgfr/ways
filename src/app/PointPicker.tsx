@@ -53,6 +53,7 @@ export function PointPicker({
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [pendingEnter, setPendingEnter] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const { hits, local, status, failed } = useSearch(open ? q : "", mapCenter.value, mapZoom.value);
@@ -113,9 +114,19 @@ export function PointPicker({
       setActive((a) => Math.max(0, a - 1));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      choose(Math.min(active, Math.max(0, count - 1)));
+      // Enter before the results arrive opens the first one as soon as it is there.
+      if (count === 0 && q.trim().length >= MIN_CHARS) setPendingEnter(true);
+      else choose(Math.min(active, Math.max(0, count - 1)));
     }
   };
+
+  useEffect(() => {
+    if (!pendingEnter) return;
+    if (hits.length > 0) {
+      setPendingEnter(false);
+      choose(0);
+    } else if (status !== "loading") setPendingEnter(false);
+  }, [pendingEnter, hits, status]);
 
   const typed = q.trim().length;
   const here = mapCenter.value;
@@ -187,19 +198,16 @@ export function PointPicker({
           ))}
           {hits.map((h, i) => {
             const index = i + shownExtras.length;
-            const group = h.source === "saved" || h.source === "recent" ? "kept" : h.source;
-            const head = group !== lastSource;
+            // Two groups: what the user kept, then places and stops ranked together.
+            const group = h.source === "saved" || h.source === "recent" ? "kept" : "found";
+            const head = group !== lastSource && (group === "kept" || lastSource === "kept");
             lastSource = group;
-            const far = h.source === "place" || h.source === "stop";
+            const far = group === "found";
             return (
               <li key={h.key}>
                 {head && (
                   <span class="results-head">
-                    {group === "kept"
-                      ? t("search.group.kept")
-                      : group === "stop"
-                        ? t("search.group.stops")
-                        : t("search.group.places")}
+                    {group === "kept" ? t("search.group.kept") : t("search.results")}
                   </span>
                 )}
                 <button

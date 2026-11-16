@@ -5,6 +5,7 @@
  */
 import { useEffect, useState } from "preact/hooks";
 import { search as searchPlaces } from "../geo/geocode";
+import { distance } from "../geo/polyline";
 import { searchRegionStops } from "../local/client";
 import { installed } from "../local/packs";
 import { searchStops, SERVICE as TRANSITOUS } from "../providers/motis";
@@ -34,8 +35,10 @@ export interface SearchState {
   failed: string[];
 }
 
-export const MIN_CHARS = 3;
-const DEBOUNCE_MS = 320;
+export const MIN_CHARS = 2;
+const DEBOUNCE_MS = 250;
+/** A stop that only half matches is shown when it is this close, in metres. */
+const NEAR_STOP_M = 50_000;
 
 /** Lower case without accents, so "republique" finds "République". */
 export function fold(s: string): string {
@@ -83,6 +86,53 @@ export function localHits(q: string, savedList: Saved[], recentList: Recent[], m
   return out;
 }
 
+/** The words that tell a result apart: three letters or more, numbers left out. */
+function keyWords(q: string): string[] {
+  return fold(q)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((w) => w.length >= 3 && !/^\d+$/.test(w));
+}
+
+/** The share of the typed words that start a word of `name`. */
+export function matchShare(q: string, name: string): number {
+  const words = keyWords(q);
+  if (words.length === 0) return 0;
+  const hay = fold(name).split(/[^\p{L}\p{N}]+/u);
+  return words.filter((w) => hay.some((h) => h.startsWith(w))).length / words.length;
+}
+
+/**
+ * Places and stops in one list, the way a map search reads: a stop named
+ * after what was typed comes first; then the places, addresses included; then
+ * the stops that match most of the words and are nearby. Stop search is
+ * fuzzy, and without this a street address drowned under bus stops of
+ * similar names hundreds of kilometres away.
+ */
+export function rankRemote(
+  q: string,
+  stops: Hit[],
+  places: Hit[],
+  near: [number, number] | undefined,
+): Hit[] {
+  const address = /\d/.test(q);
+  const strong: Hit[] = [];
+  const weak: Hit[] = [];
+  for (const s of stops) {
+    const share = matchShare(q, s.point.name);
+    const close = !near || distance(near, [s.point.lng, s.point.lat]) <= NEAR_STOP_M;
+    if (share === 1 && !address) strong.push(s);
+    else if (share >= 2 / 3 && close) weak.push(s);
+  }
+  const seen = new Set<string>();
+  const uniquePlaces = places.filter((p) => {
+    const id = fold(`${p.point.name}|${p.meta}`);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+  return [...strong, ...uniquePlaces, ...weak.slice(0, 3)];
+}
+
 export function useSearch(q: string, near: [number, number], zoom: number): SearchState {
   const [remote, setRemote] = useState<Hit[]>([]);
   const [status, setStatus] = useState<SearchState["status"]>("idle");
@@ -125,14 +175,15 @@ export function useSearch(q: string, near: [number, number], zoom: number): Sear
     const timer = setTimeout(async () => {
       const [stops, places] = await Promise.allSettled([
         searchStops(text, { near, signal: controller.signal }),
-        searchPlaces(text, { near, zoom, signal: controller.signal, limit: 6 }),
+        searchPlaces(text, { near, zoom, signal: controller.signal, limit: 8 }),
       ]);
       if (controller.signal.aborted) return;
       if ([stops, places].some((r) => r.status === "rejected" && isAbort(r.reason))) return;
-      const hits: Hit[] = [];
+      const stopHits: Hit[] = [];
+      const placeHits: Hit[] = [];
       if (stops.status === "fulfilled") {
         for (const s of stops.value) {
-          hits.push({
+          stopHits.push({
             kind: "stop",
             source: "stop",
             point: { lat: s.lat, lng: s.lng, name: s.name, stopId: s.stopId },
@@ -144,7 +195,7 @@ export function useSearch(q: string, near: [number, number], zoom: number): Sear
       }
       if (places.status === "fulfilled") {
         for (const p of places.value) {
-          hits.push({
+          placeHits.push({
             kind: "place",
             source: "place",
             point: { lat: p.lat, lng: p.lng, name: p.name },
@@ -158,7 +209,7 @@ export function useSearch(q: string, near: [number, number], zoom: number): Sear
         ...(stops.status === "rejected" ? [TRANSITOUS] : []),
         ...(places.status === "rejected" ? ["Photon"] : []),
       ];
-      setRemote(hits);
+      setRemote(rankRemote(text, stopHits, placeHits, near));
       setFailed(down);
       setStatus(down.length === 2 ? "error" : "idle");
     }, DEBOUNCE_MS);

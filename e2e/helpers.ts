@@ -53,7 +53,8 @@ export async function fakeServices(page: Page): Promise<Fakes> {
       const text = (url.searchParams.get("text") ?? "").toLowerCase();
       return json(
         route,
-        "république".startsWith(text.slice(0, 3)) || text.includes("rep") ? fakeGeocode : [],
+        // Stop search is fuzzy: "rivoli" also brings back République.
+        "république".startsWith(text.slice(0, 3)) || /rep|rivoli/.test(text) ? fakeGeocode : [],
       );
     }
     return route.fulfill({ status: 404 });
@@ -75,6 +76,7 @@ export async function fakeServices(page: Page): Promise<Fakes> {
       parlement: ["Parlement de Bretagne", 48.1127, -1.6772, "Place du Parlement", 101],
       gare: ["Gare de Rennes", 48.1035, -1.6723, "Place de la Gare", 102],
       kennedy: ["Dalle Kennedy", 48.1214, -1.711, "Cours Kennedy", 103],
+      rivoli: ["10 Rue de Rivoli", 48.1101, -1.6801, "Rue de Rivoli", 104],
     };
     const hit = Object.entries(known).find(([k]) => q.includes(k))?.[1];
     if (!reverse && !hit) return json(route, { type: "FeatureCollection", features: [] });

@@ -109,8 +109,6 @@
   "search.placeholder": "Chercher un lieu ou un arrêt",
   "search.results": "Résultats",
   "search.group.kept": "Enregistrés et récents",
-  "search.group.stops": "Arrêts",
-  "search.group.places": "Lieux",
   "search.error": "Les services de recherche n'ont pas répondu. Vérifie ta connexion et réessaie.",
   "search.partial": "{service} n'a pas répondu ; il manque des résultats.",
   "search.nothing": "Rien trouvé.",

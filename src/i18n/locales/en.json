@@ -109,8 +109,6 @@
   "search.placeholder": "Search a place or a stop",
   "search.results": "Results",
   "search.group.kept": "Saved and recent",
-  "search.group.stops": "Stops",
-  "search.group.places": "Places",
   "search.error": "The search services did not answer. Check your connection and try again.",
   "search.partial": "{service} did not answer; some results are missing.",
   "search.nothing": "Nothing found.",

@@ -109,8 +109,6 @@
   "search.placeholder": "Ort oder Haltestelle suchen",
   "search.results": "Ergebnisse",
   "search.group.kept": "Gespeichert und zuletzt",
-  "search.group.stops": "Haltestellen",
-  "search.group.places": "Orte",
   "search.error": "Die Suchdienste haben nicht geantwortet. Prüfe deine Verbindung und versuche es erneut.",
   "search.partial": "{service} hat nicht geantwortet; einige Ergebnisse fehlen.",
   "search.nothing": "Nichts gefunden.",

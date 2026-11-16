@@ -43,6 +43,22 @@ test("search finds stops and places, and opens a stop with its departures", asyn
   await expect(page.locator(".calls")).toContainText("J.F. Kennedy");
 });
 
+test("an address typed in the search comes first, and Enter opens it", async ({ page }) => {
+  await fakeServices(page);
+  await page.goto("./");
+  const field = page.getByPlaceholder("Search a place or a stop");
+  await field.fill("10 rue de rivoli");
+  const results = page.locator(".results .result");
+  await expect(results.first()).toContainText("10 Rue de Rivoli");
+  // The stop search answered République as well: it does not match the address, so it is left out.
+  await expect(page.getByRole("button", { name: /^République/ })).toHaveCount(0);
+
+  // Enter pressed before the results arrive waits for them.
+  await field.fill("10 rue de rivol");
+  await field.press("Enter");
+  await expect(page.getByRole("heading", { name: "10 Rue de Rivoli" })).toBeVisible();
+});
+
 test("a place shows what OpenStreetMap knows and where it came from", async ({ page }) => {
   await fakeServices(page);
   await page.goto("./");
@@ -279,7 +295,7 @@ test("the sources screen names every service the page talks to", async ({ page }
     "valhalla1.openstreetmap.de",
     "photon.komoot.io",
     "nominatim.openstreetmap.org",
-    "maxgfr.github.io/ways-data",
+    "maxgfr.github.io/ways/data",
   ]) {
     await expect(page.getByText(host, { exact: true })).toBeVisible();
   }
