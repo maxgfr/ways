@@ -133,6 +133,23 @@ export function rankRemote(
   return [...strong, ...uniquePlaces, ...weak.slice(0, 3)];
 }
 
+/** Within this distance of the map's centre, the user is taken to be looking around them. */
+const AROUND_ME_M = 30_000;
+
+/**
+ * The point suggestions are looked for around, and their distances measured from: the user's
+ * position when the map shows their surroundings or a whole country, otherwise the part of
+ * the map in view (someone looking at another city wants that city).
+ */
+export function searchOrigin(
+  center: [number, number],
+  zoom: number,
+  me: [number, number] | null,
+): [number, number] {
+  if (!me) return center;
+  return zoom < 9 || distance(center, me) <= AROUND_ME_M ? me : center;
+}
+
 export function useSearch(q: string, near: [number, number], zoom: number): SearchState {
   const [remote, setRemote] = useState<Hit[]>([]);
   const [status, setStatus] = useState<SearchState["status"]>("idle");
