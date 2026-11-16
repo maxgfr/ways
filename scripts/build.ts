@@ -30,7 +30,7 @@ export const CSP = [
 ].join("; ");
 
 const DESCRIPTION =
-  "A map of how to get around, built only on open data: search, directions by public transport, bike and foot, live departures, shared bikes and cycle paths. No account, no server, no API key.";
+  "A map of how to get around, built only on open data: search, directions by public transport, car, bike and foot with guidance, live departures, shared bikes and cycle paths. No account, no server, no API key.";
 
 /** Hosts whose responses the service worker keeps for the map to work offline. */
 export const TILE_HOST = "tiles.openfreemap.org";
@@ -68,7 +68,13 @@ function headInject(): string {
     `<meta property="og:title" content="ways" />`,
     `<meta property="og:description" content="${DESCRIPTION}" />`,
     `<link rel="icon" href="./icon.svg" type="image/svg+xml" />`,
+    `<link rel="apple-touch-icon" href="./apple-touch-icon.png" />`,
     `<link rel="manifest" href="./manifest.webmanifest" />`,
+    // Added to the home screen of an iPhone, it opens full screen like an app, under its name.
+    `<meta name="mobile-web-app-capable" content="yes" />`,
+    `<meta name="apple-mobile-web-app-capable" content="yes" />`,
+    `<meta name="apple-mobile-web-app-title" content="ways" />`,
+    `<meta name="apple-mobile-web-app-status-bar-style" content="default" />`,
     ...["figtree-latin-400-normal.woff2", "figtree-latin-600-normal.woff2"].map(
       (f) => `<link rel="preload" href="./fonts/${f}" as="font" type="font/woff2" crossorigin />`,
     ),

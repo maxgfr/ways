@@ -214,6 +214,10 @@ export const dark = computed(() =>
 if (typeof window !== "undefined") {
   effect(() => {
     document.documentElement.dataset.theme = dark.value ? "dark" : "light";
+    // The phone's status bar and an installed app's title bar take the panel's colour.
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", dark.value ? "#1f2329" : "#ffffff");
   });
   effect(() => {
     const prefs: Prefs = {
