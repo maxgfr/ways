@@ -70,6 +70,8 @@ export function fitBox(box: [number, number, number, number]): void {
 }
 
 const LONG_PRESS_MS = 520;
+/** The zoom a link to a place or a stop opens at: its street. */
+const LINKED_ZOOM = 16;
 const ME = "ways-me-accuracy";
 
 /**
@@ -95,8 +97,15 @@ export function MapView() {
   useEffect(() => {
     if (!container.current) return;
     maplibregl.setWorkerUrl(new URL("./maplibre-gl-worker.mjs", document.baseURI).href);
-    // Where the user last looked, or else their city as their device's time zone tells it.
-    const view = startView(lastView.value, homeZone(deviceTimezone(), navigator.language));
+    // The place or stop of a link; else where the user last looked, or else their city as their
+    // device's time zone tells it.
+    const opened = route.peek();
+    const linked =
+      opened.name === "place" || opened.name === "stop"
+        ? { lng: opened.point.lng, lat: opened.point.lat, zoom: LINKED_ZOOM }
+        : null;
+    const view =
+      linked ?? startView(lastView.value, homeZone(deviceTimezone(), navigator.language));
     const base = mapStyle(dark.value);
     const map = new maplibregl.Map({
       container: container.current,
@@ -138,6 +147,8 @@ export function MapView() {
           if (allowed) locate((pos) => showPoint(pos[0], pos[1], 15));
         });
       }
+      // The linked point, moved into the part of the map the panel leaves visible.
+      if (linked) showPoint(linked.lng, linked.lat, LINKED_ZOOM);
       disposers.push(
         attachCycling(map),
         attachPois(map, (point) => {
