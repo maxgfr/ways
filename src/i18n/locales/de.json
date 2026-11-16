@@ -204,6 +204,7 @@
   "home.local": "Was du speicherst, deine Suchen und deine Einstellungen bleiben in diesem Browser. ways hat kein Konto und keinen Server.",
   "home.local.more": "Was dieses Gerät verlässt",
   "search.local": "Lokaler Modus: Durchsucht wird, was du gespeichert hast, und die Haltestellen deiner Regionen.",
+  "search.goOnline": "Auch Adressen suchen (Modus Auto)",
   "stop.local": "Lokaler Modus: Abfahrten werden nicht abgefragt. Stelle den Modus in den Einstellungen auf Auto oder Online, um sie zu sehen.",
   "dir.positionNote": "Dein Standort wird von diesem Gerät ermittelt. Er verlässt es nur als Start einer Route, die du bei einem Online-Dienst anfragst.",
   "regions.title": "Offline-Daten",

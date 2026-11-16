@@ -51,10 +51,11 @@ test("an address typed in the search comes first, and Enter opens it", async ({ 
   const results = page.locator(".results .result");
   await expect(results.first()).toContainText("10 Rue de Rivoli");
   // The stop search answered République as well: it does not match the address, so it is left out.
-  await expect(page.getByRole("button", { name: /^République/ })).toHaveCount(0);
+  await expect(results.filter({ hasText: "République" })).toHaveCount(0);
 
   // Enter pressed before the results arrive waits for them.
-  await field.fill("10 rue de rivol");
+  await field.fill("");
+  await field.fill("rivoli 10");
   await field.press("Enter");
   await expect(page.getByRole("heading", { name: "10 Rue de Rivoli" })).toBeVisible();
 });
@@ -376,6 +377,26 @@ test("local mode calls no service at all", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Parlement de Bretagne" })).toBeVisible();
   await page.waitForTimeout(1500);
   expect(fakes.calls).toEqual([]);
+});
+
+test("in local mode, the search offers to look addresses up online", async ({ page }) => {
+  const fakes = await fakeServices(page);
+  await setUp(page, { engine: "device" });
+  await page.goto("./");
+  const field = page.getByPlaceholder("Search a place or a stop");
+  await field.fill("10 rue de rivoli");
+  await expect(page.locator(".results .result")).toHaveCount(0);
+  expect(fakes.calls).toEqual([]);
+
+  await page.getByRole("button", { name: "Search addresses too (Auto mode)" }).click();
+  await expect(page.locator(".results .result").first()).toContainText("10 Rue de Rivoli");
+  // The choice is the setting itself: it stays after a reload.
+  await page.goto("./#/settings");
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Auto", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 });
 
 test.describe("a browser set to German", () => {

@@ -204,6 +204,7 @@
   "home.local": "Ce que tu enregistres, tes recherches et tes réglages restent dans ce navigateur. ways n'a ni compte ni serveur.",
   "home.local.more": "Ce qui quitte cet appareil",
   "search.local": "Mode local : la recherche porte sur ce que tu as enregistré et sur les arrêts de tes régions.",
+  "search.goOnline": "Chercher aussi les adresses (mode Auto)",
   "stop.local": "Mode local : les passages ne sont pas demandés. Passe le mode sur Auto ou En ligne dans les réglages pour les voir.",
   "dir.positionNote": "Ta position est trouvée par cet appareil. Elle ne le quitte que comme point de départ d'un trajet demandé à un service en ligne.",
   "regions.title": "Données hors ligne",

@@ -8,6 +8,7 @@ import { distance } from "../geo/polyline";
 import { formatDistance, t } from "../i18n";
 import { mapCenter, mapZoom } from "../map/MapView";
 import { Icon, type IconName, vehicleIcon } from "../ui/icons";
+import { engine } from "./prefs";
 import { type Hit, MIN_CHARS, useSearch } from "./search";
 
 export interface Extra {
@@ -238,7 +239,22 @@ export function PointPicker({
           {status === "idle" && failed.length === 1 && (
             <li class="results-note">{t("search.partial", { service: failed[0] ?? "" })}</li>
           )}
-          {local && typed > 0 && <li class="results-note">{t("search.local")}</li>}
+          {local && typed > 0 && (
+            <li class="results-note">
+              {t("search.local")}{" "}
+              <button
+                type="button"
+                class="link-btn"
+                onClick={() => {
+                  // Addresses need the search service: Auto asks it, and still routes on the device when it can.
+                  engine.value = "auto";
+                  input.current?.focus();
+                }}
+              >
+                {t("search.goOnline")}
+              </button>
+            </li>
+          )}
           {!local &&
             status === "idle" &&
             failed.length === 0 &&
