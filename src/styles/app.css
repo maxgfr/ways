@@ -1063,8 +1063,11 @@ fieldset {
   background: var(--paper-3);
 }
 
-/* On a narrow phone, a row of four modes keeps the label of the chosen one only. */
-@media (max-width: 440px) {
+/*
+ * On a narrow phone, and in the side panel of a wide screen, a row of four modes keeps the
+ * label of the chosen one only: four labels do not fit.
+ */
+@media (max-width: 440px), (min-width: 900px) {
   .segmented:has(> button:nth-child(4) svg) button:not([aria-pressed="true"]) .seg-label {
     position: absolute;
     width: 1px;
