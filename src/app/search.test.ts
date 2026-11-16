@@ -7,6 +7,7 @@ import {
   labelParts,
   localHits,
   matchShare,
+  nearestFirstByName,
   rankRemote,
   searchOrigin,
 } from "./search";
@@ -71,6 +72,56 @@ describe("rankRemote", () => {
     const near = stop("Gare Montparnasse Vaugirard", 48.84, 2.32);
     const far = stop("Gare Montparnasse Vaugirard bis", 45.7, 4.8);
     expect(rankRemote("gare montparnasse sncf", [near, far], [], PARIS)).toEqual([near]);
+  });
+
+  test("stops named after the words typed but far away come after the places, two at most", () => {
+    const ranked = rankRemote(
+      "rue de la paix",
+      [
+        stop("Rue de la Paix", 48.75, 2.41), // Villeneuve-le-Roi, 12 km
+        stop("Rue de la Paix", 49.05, 7.43), // Bitche
+        stop("Rue de la Paix", 48.46, 7.48), // Obernai
+        stop("Rue de la Paix", 45.79, 4.36), // Panissières
+      ],
+      [
+        place("Rue de la Paix", "94250 Gentilly", 48.814, 2.344),
+        place("Rue de la Paix", "75002 Paris", 48.869, 2.331),
+      ],
+      PARIS,
+    );
+    expect(ranked.map((h) => h.meta || `${h.point.lat}`)).toEqual([
+      "48.75",
+      "75002 Paris",
+      "94250 Gentilly",
+      "49.05",
+      "45.79",
+    ]);
+  });
+});
+
+describe("nearestFirstByName", () => {
+  test("places of the same name, nearest first, where the name first came", () => {
+    const list = [
+      place("Rue de la Paix", "Gentilly", 48.814, 2.344),
+      place("Chapelle de la Paix", "Paris", 48.84, 2.39),
+      place("Rue de la Paix", "Paris", 48.869, 2.331),
+    ];
+    expect(nearestFirstByName(list, PARIS).map((h) => `${h.point.name}, ${h.meta}`)).toEqual([
+      "Rue de la Paix, Paris",
+      "Rue de la Paix, Gentilly",
+      "Chapelle de la Paix, Paris",
+    ]);
+  });
+
+  test("a city keeps its rank before a place of its name nearby", () => {
+    const city = { ...place("Lyon", "France", 45.76, 4.84), area: true };
+    const artwork = place("Lyon", "Paris", 48.85, 2.37);
+    expect(nearestFirstByName([city, artwork], PARIS)).toEqual([city, artwork]);
+  });
+
+  test("without a point to measure from, the order stays", () => {
+    const list = [place("A", "x", 45, 4), place("A", "y", 48.85, 2.35)];
+    expect(nearestFirstByName(list, undefined)).toEqual(list);
   });
 });
 

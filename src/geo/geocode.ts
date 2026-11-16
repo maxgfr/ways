@@ -16,6 +16,8 @@ export interface GeoResult {
   lng: number;
   /** OpenStreetMap's kind of place ("restaurant", "cafe", "museum"…). */
   kind?: string;
+  /** A settlement or a region (a city, a town, a village, a country) rather than one place in it. */
+  area?: boolean;
   /** The OpenStreetMap object behind the result ("N123", "W456", "R789"), to look up its details. */
   osm?: string;
   /** A unique key for lists. */
@@ -77,6 +79,7 @@ export function fromPhoton(f: PhotonFeature): GeoResult | null {
     lng: c[0],
     lat: c[1],
     ...(kind ? { kind } : {}),
+    ...(p.osm_key === "place" || p.osm_key === "boundary" ? { area: true } : {}),
     ...(p.osm_type && p.osm_id ? { osm: `${p.osm_type}${p.osm_id}` } : {}),
     key: `${p.osm_type ?? ""}${p.osm_id ?? `${c[0]},${c[1]}`}`,
   };

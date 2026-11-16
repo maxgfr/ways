@@ -23,6 +23,8 @@ export interface Hit {
   /** The line under the name: an address, a town. */
   meta: string;
   vehicles?: Vehicle[];
+  /** A town, a city, a region: it keeps its rank among places of the same name. */
+  area?: boolean;
   key: string;
 }
 
@@ -102,11 +104,34 @@ export function matchShare(q: string, name: string): number {
 }
 
 /**
- * Places and stops in one list, the way a map search reads: a stop named
- * after what was typed comes first; then the places, addresses included; then
- * the stops that match most of the words and are nearby. Stop search is
- * fuzzy, and without this a street address drowned under bus stops of
- * similar names hundreds of kilometres away.
+ * Places of the same name nearest first, each name where it first came: many
+ * towns have a "Rue de la Paix", and the user means the one around them. A
+ * town or city keeps its rank: "Lyon" is the city before a Lyon street nearby.
+ */
+export function nearestFirstByName(places: Hit[], near: [number, number] | undefined): Hit[] {
+  if (!near) return places;
+  const groups = new Map<string, Hit[]>();
+  for (const p of places) {
+    const name = fold(p.point.name);
+    const group = groups.get(name);
+    if (group) group.push(p);
+    else groups.set(name, [p]);
+  }
+  const away = (h: Hit) => distance(near, [h.point.lng, h.point.lat]);
+  return [...groups.values()].flatMap((group) => {
+    const areas = group.filter((h) => h.area);
+    const rest = group.filter((h) => !h.area).sort((a, b) => away(a) - away(b));
+    return [...areas, ...rest];
+  });
+}
+
+/**
+ * Places and stops in one list, the way a map search reads: a nearby stop
+ * named after what was typed comes first; then the places, addresses
+ * included, the nearest of a name first; then the stops that match most of
+ * the words and are nearby, and last a few stops of that name far away. Stop
+ * search is fuzzy and covers the world: without this, a street address drowned
+ * under bus stops of similar names hundreds of kilometres away.
  */
 export function rankRemote(
   q: string,
@@ -117,10 +142,11 @@ export function rankRemote(
   const address = /\d/.test(q);
   const strong: Hit[] = [];
   const weak: Hit[] = [];
+  const far: Hit[] = [];
   for (const s of stops) {
     const share = matchShare(q, s.point.name);
     const close = !near || distance(near, [s.point.lng, s.point.lat]) <= NEAR_STOP_M;
-    if (share === 1 && !address) strong.push(s);
+    if (share === 1 && !address) (close ? strong : far).push(s);
     else if (share >= 2 / 3 && close) weak.push(s);
   }
   const seen = new Set<string>();
@@ -130,7 +156,19 @@ export function rankRemote(
     seen.add(id);
     return true;
   });
-  return [...strong, ...uniquePlaces, ...weak.slice(0, 3)];
+  const byDistance = (list: Hit[]) =>
+    near
+      ? [...list].sort(
+          (a, b) =>
+            distance(near, [a.point.lng, a.point.lat]) - distance(near, [b.point.lng, b.point.lat]),
+        )
+      : list;
+  return [
+    ...byDistance(strong),
+    ...nearestFirstByName(uniquePlaces, near),
+    ...weak.slice(0, 3),
+    ...byDistance(far).slice(0, 2),
+  ];
 }
 
 /** Within this distance of the map's centre, the user is taken to be looking around them. */
@@ -218,6 +256,7 @@ export function useSearch(q: string, near: [number, number], zoom: number): Sear
             point: { lat: p.lat, lng: p.lng, name: p.name },
             ...(p.osm ? { osm: p.osm } : {}),
             meta: p.address,
+            ...(p.area ? { area: true } : {}),
             key: `place:${p.key}`,
           });
         }
