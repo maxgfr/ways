@@ -132,6 +132,47 @@ export function startView(last: StartView | null | undefined, zone: string | und
   return last && last.zoom >= MIN_KEPT_ZOOM ? last : viewForTimezone(zone);
 }
 
+/** The single time zone of the country a language tag names ("fr-FR", or "fr" taken as France). */
+function languageZone(language: string): string | undefined {
+  try {
+    const locale = new Intl.Locale(language).maximize() as Intl.Locale & {
+      getTimeZones?: () => string[] | undefined;
+      timeZones?: string[];
+    };
+    const zones = locale.getTimeZones?.() ?? locale.timeZones;
+    return zones?.length === 1 ? zones[0] : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function utcOffset(zone: string, at: Date): string | undefined {
+  try {
+    return new Intl.DateTimeFormat("en", { timeZone: zone, timeZoneName: "longOffset" })
+      .formatToParts(at)
+      .find((p) => p.type === "timeZoneName")?.value;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The zone that best tells where the user is. A device is often set to a
+ * neighbouring city of the same hour (a Mac in France set to Berlin): when the
+ * browser's language names a country with one zone, listed here and on the
+ * same hour right now, that country wins. Otherwise the device's zone does.
+ */
+export function homeZone(
+  zone: string | undefined,
+  language: string | undefined,
+  at = new Date(),
+): string | undefined {
+  const fromLanguage = language ? languageZone(language) : undefined;
+  if (!fromLanguage || fromLanguage === zone || !ZONES[fromLanguage]) return zone;
+  if (!zone) return fromLanguage;
+  return utcOffset(fromLanguage, at) === utcOffset(zone, at) ? fromLanguage : zone;
+}
+
 export function deviceTimezone(): string | undefined {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;

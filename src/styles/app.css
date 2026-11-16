@@ -705,6 +705,14 @@ fieldset {
   display: none;
 }
 
+/* With a mouse a hidden scroller just looks cut off: the buttons wrap instead. */
+@media (pointer: fine) {
+  .actions {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+}
+
 /* Home: shortcuts and lists. */
 .shortcuts {
   display: grid;

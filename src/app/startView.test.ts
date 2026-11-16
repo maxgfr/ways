@@ -1,5 +1,29 @@
 import { describe, expect, test } from "bun:test";
-import { startView, viewForTimezone } from "./startView";
+import { homeZone, startView, viewForTimezone } from "./startView";
+
+describe("homeZone", () => {
+  const winter = new Date("2026-01-15T12:00:00Z");
+
+  test("a French browser on a Mac set to Berlin opens on Paris: same hour, one zone", () => {
+    expect(homeZone("Europe/Berlin", "fr-FR", winter)).toBe("Europe/Paris");
+    expect(homeZone("Europe/Berlin", "fr", winter)).toBe("Europe/Paris");
+  });
+
+  test("the device's zone stays when the language's country is on another hour", () => {
+    expect(homeZone("Europe/Berlin", "en-GB", winter)).toBe("Europe/Berlin");
+    expect(homeZone("Asia/Tokyo", "fr-FR", winter)).toBe("Asia/Tokyo");
+  });
+
+  test("the device's zone stays when the language's country has several zones", () => {
+    expect(homeZone("Europe/Berlin", "en-US", winter)).toBe("Europe/Berlin");
+    expect(homeZone("Europe/Paris", "de-DE", winter)).toBe("Europe/Paris");
+  });
+
+  test("without a device zone, the language's country is used", () => {
+    expect(homeZone(undefined, "fr-FR", winter)).toBe("Europe/Paris");
+    expect(homeZone(undefined, undefined, winter)).toBeUndefined();
+  });
+});
 
 describe("startView", () => {
   test("reopens where the user last looked", () => {
