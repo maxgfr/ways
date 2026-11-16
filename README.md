@@ -11,12 +11,13 @@ No account, no server, no API key, no tracking. ways is a static page: your brow
 - **Search** places (Photon) and stops (Transitous), with what you saved and looked up recently first.
 - **Places on the map**: shops, restaurants, museums… with their icon; a tap opens their card, with opening hours, website and phone found automatically.
 - **Categories**: restaurants, cafés, bars, groceries, pharmacies, hotels and museums in the area on screen, listed by distance and marked on the map. Read from the map tiles already on screen: nothing is sent.
-- **Directions** by public transport, bike and foot, with live times where the operator publishes them. Each way of travelling has its own stroke, on the map and in the list: a solid line for a ride, dashes by bike, dots on foot.
+- **Directions** by public transport, car, bike and foot, with live times where the operator publishes them. Each way of travelling has its own stroke, on the map and in the list: a solid line for a ride or a drive, dashes by bike, dots on foot. By car, tolls and motorways can be avoided.
+- **Guidance**: start a trip and the map follows you, turned the way you go, with the next turn and its distance in large type, the time and arrival left, spoken instructions you can mute, the screen kept awake, and a new route when you leave this one.
 - **Stops**: next departures, marked _live_ or _scheduled_, delays, cancellations, service alerts, and the run of a line on the map.
 - **Layers**: stops, cycle paths, shared bikes and scooters with what is available now, vehicles in service.
-- **Yours, on your device**: saved places, recent searches, your preferred mode, flatter routes by bike, walking pace, step-free routes, theme and language are kept in this browser and nowhere else.
+- **Yours, on your device**: saved places, recent searches (which you can remove, or not keep at all), your preferred mode, flatter routes by bike, walking pace, step-free routes, roads to avoid by car, theme and language are kept in this browser and nowhere else.
 - **Opens where you are**: on your position when you allowed it before, otherwise on your city as your device's time zone tells it. No network is asked to guess.
-- **Offline**: installable; map areas you have seen stay available. The timetables and streets of the areas you look things up in download on their own, so trips there keep working without a network.
+- **Offline**: installable on a phone's home screen like an app; map areas you have seen stay available. The timetables and streets of the areas you look things up in download on their own, so trips there keep working without a network.
 - **Local mode**: one setting stops every call to a service. Trips are then computed in your browser from the offline data: public transport on the timetable, bike and foot on the street network. Nothing about the trip leaves the device.
 - English, French and German.
 
@@ -28,8 +29,8 @@ Nothing is stored anywhere but your browser. A request leaves only when you do s
 | -------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | [OpenFreeMap](https://openfreemap.org/)                  | The map                                                                    | The map areas you look at                                                                 |
 | [Transitous](https://transitous.org/)                    | Transit trips, departures, stops, live vehicles, shared bikes, stop search | Both ends of a trip you ask for, the map area for stops and vehicles, the text you search |
-| [Valhalla](https://valhalla.openstreetmap.de/) (FOSSGIS) | Bike and foot routes                                                       | Both ends of the trip and your travel preferences                                         |
-| [Photon](https://photon.komoot.io/) (komoot)             | Place search, address of a pressed point                                   | The text you search and the centre of the map                                             |
+| [Valhalla](https://valhalla.openstreetmap.de/) (FOSSGIS) | Car, bike and foot routes                                                  | Both ends of the trip and your travel preferences                                         |
+| [Photon](https://photon.komoot.io/) (komoot)             | Place search, address of a pressed point                                   | The text you search, and your position or the centre of the map to rank nearby results    |
 | [Nominatim](https://nominatim.openstreetmap.org/)        | Opening hours, website, phone of a place                                   | The reference of the place whose card you open                                            |
 | This site (`maxgfr.github.io/ways/data`)                 | Offline data for the areas you look things up in                           | Which area's files are downloaded                                                         |
 
@@ -40,7 +41,7 @@ These services are run by volunteers and answer on a best-effort basis. Map data
 ## Three modes
 
 - **Auto** (default): the open services are asked first; when they do not answer and offline data covers the trip, it is computed on the device.
-- **Online**: Transitous for public transport, Valhalla for bike and foot. Live times where operators publish them, anywhere in the world.
+- **Online**: Transitous for public transport, Valhalla for car, bike and foot. Live times where operators publish them, anywhere in the world.
 - **Local**: no service is called at all. Trips come from the offline data, on the timetable only (no live times). Search covers what you saved and the stops held offline. Only map tiles still load, unless you kept the area offline.
 
 ## Offline data
